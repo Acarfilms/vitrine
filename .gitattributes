@@ -1,0 +1,6 @@
+* text=auto eol=lf
+
+# Generated files: collapsed in diffs and left out of language stats.
+dist/** linguist-generated=true
+docs/**/*.svg linguist-generated=true
+src/assets/inter.js linguist-generated=true
