@@ -1,0 +1,54 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node: [22, 24]
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: ${{ matrix.node }}
+          cache: npm
+      - run: npm ci
+      - run: npm test
+
+  # The action runs from the committed bundle, so it has to match the source.
+  dist:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - run: npm run build
+      - name: Check that dist/ is up to date
+        run: git diff --exit-code -- dist || (echo "Run npm run build and commit dist/." && exit 1)
+
+  # Runs the action the way a user would, without the commit.
+  action:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: ./
+        with:
+          config: examples/vitrine.yml
+          output: rendered
+          commit: 'false'
+      - name: Check the output
+        run: |
+          ls rendered
+          test -s rendered/hero.svg
+          test -s rendered/activity-dark.svg

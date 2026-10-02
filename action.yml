@@ -1,0 +1,30 @@
+name: Vitrine
+description: Liquid Glass cards for your GitHub profile README, rendered in your own repository.
+author: Angel Carrascosa
+branding:
+  icon: layers
+  color: blue
+
+inputs:
+  config:
+    description: Path to the config file.
+    default: vitrine.yml
+  output:
+    description: Folder the SVG files are written to.
+    default: vitrine
+  readme:
+    description: The README the cards appear in. The markup in the run summary uses image paths relative to it.
+    default: README.md
+  token:
+    description: Token used to read the contribution calendar for the activity card.
+    default: ${{ github.token }}
+  commit:
+    description: Commit the cards back to the repository when they change.
+    default: 'true'
+  commit-message:
+    description: Message for that commit.
+    default: Update profile cards
+
+runs:
+  using: node24
+  main: dist/index.js
