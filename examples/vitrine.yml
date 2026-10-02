@@ -1,0 +1,59 @@
+# The config behind github.com/Acarfilms. Every section is optional.
+
+login: Acarfilms
+wallpaper: tide
+accent: blue
+
+hero:
+  name: Angel Carrascosa
+  role: Full-stack developer
+  tagline: Apps, web and AI products — from first idea to production.
+  widgets:
+    - icon: location
+      label: Based in
+      value: Toledo, Spain
+    - icon: briefcase
+      label: Leading tech at
+      value: IABeauty
+    - icon: code
+      label: Focus
+      value: Apps · Web · AI
+
+expertise:
+  tiles:
+    - eyebrow: Apps & Web
+      headline: [Native feel., Web speed.]
+      body:
+        - Cross-platform apps in Flutter and React Native.
+        - Fast, modern web with React and Next.js.
+      icons: [flutter, dart, react, nextdotjs, typescript, firebase]
+    - eyebrow: Autonomous AI
+      headline: [Work that, runs itself.]
+      body: AI agents and automations that take real work off the table, end to end.
+    - eyebrow: Leadership
+      headline: [From roadmap, to release.]
+      body: Leading tech at IABeauty, with sprints and planning in Notion and Jira.
+      icons: [notion, jira]
+
+specs:
+  rows:
+    - label: Mobile
+      items: [flutter, dart, { icon: react, label: React Native }]
+    - label: Web
+      items: [react, nextdotjs, typescript]
+    - label: Backend & data
+      items: [firebase, supabase, mongodb]
+    - label: DevOps
+      items: [docker, git, github]
+    - label: Planning
+      items: [notion, jira]
+
+activity: true
+
+links:
+  - icon: linkedin
+    label: LinkedIn
+    url: https://www.linkedin.com/in/angel-carrascosa-nombela-ab7b72151/
+  - icon: instagram
+    label: Instagram
+    url: https://www.instagram.com/acarfilms19/
