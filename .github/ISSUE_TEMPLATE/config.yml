@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Questions and ideas
+    url: https://github.com/Acarfilms/vitrine/discussions
+    about: Ask how to do something, share your profile or talk through an idea.
+  - name: Security vulnerability
+    url: https://github.com/Acarfilms/vitrine/security/advisories/new
+    about: Report it privately instead of opening a public issue.
