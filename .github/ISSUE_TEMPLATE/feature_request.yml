@@ -1,0 +1,22 @@
+name: Feature request
+description: A new card, option, wallpaper or symbol.
+labels: [enhancement]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: What would you like to show on your profile?
+      description: Describe what's missing, rather than how to build it.
+    validations:
+      required: true
+  - type: textarea
+    id: idea
+    attributes:
+      label: How could it look?
+      description: Optional. A sketch, a screenshot of something similar, or the `vitrine.yml` you'd like to write.
+  - type: checkboxes
+    id: help
+    attributes:
+      label: Contributing
+      options:
+        - label: I'd like to work on this myself.

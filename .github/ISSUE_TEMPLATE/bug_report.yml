@@ -1,0 +1,50 @@
+name: Bug report
+description: Something renders wrong, fails or behaves unexpectedly.
+labels: [bug]
+body:
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened
+      description: What you expected, and what you got instead. Screenshots of the card help a lot.
+    validations:
+      required: true
+  - type: textarea
+    id: config
+    attributes:
+      label: vitrine.yml
+      description: The smallest config that shows the problem.
+      render: yaml
+    validations:
+      required: true
+  - type: textarea
+    id: log
+    attributes:
+      label: Error or log output
+      description: From the Actions run, or from the terminal if you ran Vitrine locally.
+      render: text
+  - type: dropdown
+    id: where
+    attributes:
+      label: Where did you run it?
+      options:
+        - GitHub Action
+        - Locally (npx or node)
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: Version
+      description: The tag in your workflow (for example `v1`), or the commit if you ran it locally.
+      placeholder: v1
+  - type: dropdown
+    id: theme
+    attributes:
+      label: Theme
+      description: Which GitHub theme shows the problem?
+      options:
+        - Light
+        - Dark
+        - Both
+        - Not about how it looks
