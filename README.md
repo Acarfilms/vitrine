@@ -185,7 +185,7 @@ Hero widgets and links can also use these symbols:
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="docs/symbols-dark.svg">
-  <img src="docs/symbols-light.svg" width="100%" alt="Symbols: location, briefcase, building, code, terminal, globe, layers, calendar, appearance, book.">
+  <img src="docs/symbols-light.svg" width="100%" alt="Symbols: location, briefcase, building, code, terminal, globe, layers, calendar, appearance, book, mail.">
 </picture>
 
 ## Action inputs

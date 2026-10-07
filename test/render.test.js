@@ -3,6 +3,7 @@ import { test } from 'node:test';
 import { loadConfig, normalize } from '../src/config.js';
 import { renderCards } from '../src/render/index.js';
 import { WALLPAPERS } from '../src/render/wallpaper.js';
+import { icon } from '../src/render/icons.js';
 import { snippet } from '../src/snippet.js';
 
 const stats = {
@@ -44,6 +45,21 @@ test('every wallpaper renders', () => {
     const [card] = renderCards(normalize({ wallpaper, hero: { name: 'Ada' } }));
     assert.match(card.svg, /id="wall"/, wallpaper);
   }
+});
+
+test('mail symbols render in hero widgets and link buttons', () => {
+  const config = normalize({
+    hero: { name: 'Ada', widgets: [{ icon: 'mail', label: 'Email', value: 'ada@example.com' }] },
+    links: [{ icon: 'mail', label: 'Email', url: 'https://example.com/contact' }],
+  });
+  const cards = renderCards(config);
+  assert.deepEqual(cards.map(({ file }) => file), ['hero.svg', 'link-email.svg']);
+  const symbol = icon('mail', { x: 0, y: 0, color: '#FFFFFF' });
+  for (const { file, svg } of cards) {
+    assert.ok(svg.includes(symbol.slice(symbol.indexOf('>') + 1, -4)), file);
+    assert.doesNotMatch(svg, /NaN|undefined|\[object/, file);
+  }
+  assert.match(symbol, /stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/);
 });
 
 test('long text is cut to fit instead of spilling out', () => {
