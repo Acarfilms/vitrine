@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased
+
+- Link buttons accept `mailto:` URLs for email links.
+
 ## 1.0.1 (2026-10-02)
 
 - The action is listed as "Vitrine Profile Cards", since GitHub Marketplace names can't match an existing GitHub account.
