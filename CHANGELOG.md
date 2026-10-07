@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased
+
+- A `language` option translates the activity card and the default card titles into Spanish, French, German or Portuguese, and formats numbers the local way.
+
 ## 1.0.1 (2026-10-02)
 
 - The action is listed as "Vitrine Profile Cards", since GitHub Marketplace names can't match an existing GitHub account.

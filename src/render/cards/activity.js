@@ -1,29 +1,30 @@
 import { CARD_WIDTH, CONTENT_TOP, section, surface } from '../section.js';
+import { days, formatNumber, LANGUAGES } from '../../language.js';
 import { measure, round, text } from '../svg.js';
 
 const INSET = 36;
 const HEIGHT = 280;
-const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
-export function activity({ title }, stats, theme) {
+export function activity({ title }, stats, theme, language = 'en') {
   const span = CARD_WIDTH - INSET * 2;
+  const words = LANGUAGES[language].activity;
 
-  return section(theme, { title, aside: 'Last 12 months' }, HEIGHT, [
+  return section(theme, { title, aside: words.period }, HEIGHT, [
     surface(theme, { y: CONTENT_TOP, height: HEIGHT }),
-    figures(stats, theme, span),
+    figures(stats, theme, span, language),
     `<path d="M${INSET} ${CONTENT_TOP + 128.5}H${CARD_WIDTH - INSET}" stroke="${theme.separator}"/>`,
-    chart(stats, theme, span),
+    chart(stats, theme, span, words),
   ].join('\n'));
 }
 
-function figures(stats, theme, span) {
-  const days = (n) => (n === 1 ? 'day' : 'days');
-  const format = (n) => n.toLocaleString('en-US');
+function figures(stats, theme, span, language) {
+  const words = LANGUAGES[language].activity;
+  const format = (n) => formatNumber(n, language);
   const items = [
-    ['Contributions', format(stats.total)],
-    ['Active days', format(stats.activeDays)],
-    ['Current streak', format(stats.currentStreak), days(stats.currentStreak)],
-    ['Longest streak', format(stats.longestStreak), days(stats.longestStreak)],
+    [words.contributions, format(stats.total)],
+    [words.activeDays, format(stats.activeDays)],
+    [words.currentStreak, format(stats.currentStreak), days(stats.currentStreak, language)],
+    [words.longestStreak, format(stats.longestStreak), days(stats.longestStreak, language)],
   ];
 
   return items.map(([label, value, unit], i) => {
@@ -39,7 +40,7 @@ function figures(stats, theme, span) {
 }
 
 // Weekly totals as capsules, like Screen Time, with a dashed line at the weekly average.
-function chart({ weeks, total }, theme, span) {
+function chart({ weeks, total }, theme, span, words) {
   const baseline = CONTENT_TOP + 232;
   const tallest = 80;
   const step = span / weeks.length;
@@ -61,7 +62,7 @@ function chart({ weeks, total }, theme, span) {
     const month = new Date(`${week.start}T00:00:00Z`).getUTCMonth();
     const roomForLabel = x - lastLabelX > 36 && x < CARD_WIDTH - 60;
     if (previousMonth !== null && month !== previousMonth && roomForLabel) {
-      labels.push(text(MONTHS[month], { font: 'text-500', size: 12, x, y: CONTENT_TOP + 256, fill: theme.tertiary }));
+      labels.push(text(words.months[month], { font: 'text-500', size: 12, x, y: CONTENT_TOP + 256, fill: theme.tertiary }));
       lastLabelX = x;
     }
     previousMonth = month;
@@ -69,7 +70,7 @@ function chart({ weeks, total }, theme, span) {
 
   const average = total / weeks.length;
   const averageY = round(baseline - barHeight(average));
-  const averageLabel = `avg ${Math.round(average)}/wk`;
+  const averageLabel = words.average(Math.round(average));
   const labelWidth = round(measure(averageLabel, 'text-500', 12) + 12);
 
   return [

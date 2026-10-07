@@ -2,6 +2,7 @@ import { readFile } from 'node:fs/promises';
 import { parse } from 'yaml';
 import { arrange } from './render/cards/expertise.js';
 import { brandTitle, isBrand, isSymbol, suggestBrands, SYMBOL_NAMES } from './render/icons.js';
+import { LANGUAGES } from './language.js';
 import { ACCENTS } from './render/theme.js';
 import { WALLPAPERS } from './render/wallpaper.js';
 
@@ -30,16 +31,20 @@ export function normalize(raw, file = 'vitrine.yml') {
   const check = checker(file);
 
   check.object(raw, 'The file');
-  check.keys(raw, ['login', 'wallpaper', 'accent', 'hero', 'expertise', 'specs', 'activity', 'links'], 'The file');
+  check.keys(raw, ['login', 'language', 'wallpaper', 'accent', 'hero', 'expertise', 'specs', 'activity', 'links'], 'The file');
+
+  const language = check.oneOf(raw.language ?? 'en', Object.keys(LANGUAGES), 'language');
+  const { titles } = LANGUAGES[language];
 
   const config = {
     login: check.optionalString(raw.login, 'login'),
+    language,
     wallpaper: check.oneOf(raw.wallpaper ?? 'tide', Object.keys(WALLPAPERS), 'wallpaper'),
     accent: check.oneOf(raw.accent ?? 'blue', Object.keys(ACCENTS), 'accent'),
     hero: raw.hero === undefined ? null : hero(raw.hero, check),
-    expertise: raw.expertise === undefined ? null : expertise(raw.expertise, check),
-    specs: raw.specs === undefined ? null : specs(raw.specs, check),
-    activity: activity(raw.activity, check),
+    expertise: raw.expertise === undefined ? null : expertise(raw.expertise, check, titles),
+    specs: raw.specs === undefined ? null : specs(raw.specs, check, titles),
+    activity: activity(raw.activity, check, titles),
     links: links(raw.links ?? [], check),
   };
 
@@ -71,7 +76,7 @@ function hero(raw, check) {
   };
 }
 
-function expertise(raw, check) {
+function expertise(raw, check, titles) {
   check.object(raw, 'expertise');
   check.keys(raw, ['title', 'tiles'], 'expertise');
   const tiles = check.list(raw.tiles, 'expertise.tiles', { min: 1, max: 7 }).map((tile, i) => {
@@ -98,15 +103,15 @@ function expertise(raw, check) {
     }
   }
 
-  return { title: check.optionalString(raw.title, 'expertise.title') ?? 'Expertise', tiles };
+  return { title: check.optionalString(raw.title, 'expertise.title') ?? titles.expertise, tiles };
 }
 
-function specs(raw, check) {
+function specs(raw, check, titles) {
   check.object(raw, 'specs');
   check.keys(raw, ['title', 'rows'], 'specs');
   const rows = check.list(raw.rows, 'specs.rows', { min: 1 });
   return {
-    title: check.optionalString(raw.title, 'specs.title') ?? 'Tech specs',
+    title: check.optionalString(raw.title, 'specs.title') ?? titles.specs,
     rows: rows.map((row, i) => {
       const at = `specs.rows[${i}]`;
       check.object(row, at);
@@ -132,12 +137,12 @@ function specItem(item, at, check) {
   return { icon: slug, label: check.optionalString(item.label, `${at}.label`) ?? brandTitle(slug) };
 }
 
-function activity(raw, check) {
+function activity(raw, check, titles) {
   if (raw === undefined || raw === false) return null;
-  if (raw === true) return { title: 'Activity' };
+  if (raw === true) return { title: titles.activity };
   check.object(raw, 'activity');
   check.keys(raw, ['title'], 'activity');
-  return { title: check.optionalString(raw.title, 'activity.title') ?? 'Activity' };
+  return { title: check.optionalString(raw.title, 'activity.title') ?? titles.activity };
 }
 
 const MAX_LINK_LABEL = 24;

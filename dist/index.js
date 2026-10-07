@@ -21487,6 +21487,92 @@ function appIcon(slug, theme2, { x, y, size }) {
   ].join("\n");
 }
 
+// src/language.js
+var LANGUAGES = {
+  en: {
+    locale: "en-US",
+    titles: { expertise: "Expertise", specs: "Tech specs", activity: "Activity" },
+    activity: {
+      period: "Last 12 months",
+      contributions: "Contributions",
+      activeDays: "Active days",
+      currentStreak: "Current streak",
+      longestStreak: "Longest streak",
+      day: { one: "day", other: "days" },
+      average: (n) => `avg ${n}/wk`,
+      months: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
+      alt: "contributions, active days and streaks over the last 12 months"
+    }
+  },
+  es: {
+    locale: "es-ES",
+    titles: { expertise: "Especialidades", specs: "Especificaciones t\xE9cnicas", activity: "Actividad" },
+    activity: {
+      period: "\xDAltimos 12 meses",
+      contributions: "Contribuciones",
+      activeDays: "D\xEDas activos",
+      currentStreak: "Racha actual",
+      longestStreak: "Racha m\xE1s larga",
+      day: { one: "d\xEDa", other: "d\xEDas" },
+      average: (n) => `media ${n}/sem`,
+      months: ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"],
+      alt: "contribuciones, d\xEDas activos y rachas de los \xFAltimos 12 meses"
+    }
+  },
+  fr: {
+    locale: "fr-FR",
+    titles: { expertise: "Expertise", specs: "Caract\xE9ristiques techniques", activity: "Activit\xE9" },
+    activity: {
+      period: "12 derniers mois",
+      contributions: "Contributions",
+      activeDays: "Jours actifs",
+      currentStreak: "S\xE9rie actuelle",
+      longestStreak: "Plus longue s\xE9rie",
+      day: { one: "jour", other: "jours" },
+      average: (n) => `moy. ${n}/sem.`,
+      months: ["Janv", "F\xE9vr", "Mars", "Avr", "Mai", "Juin", "Juil", "Ao\xFBt", "Sept", "Oct", "Nov", "D\xE9c"],
+      alt: "contributions, jours actifs et s\xE9ries des 12 derniers mois"
+    }
+  },
+  de: {
+    locale: "de-DE",
+    titles: { expertise: "Kompetenzen", specs: "Technische Daten", activity: "Aktivit\xE4t" },
+    activity: {
+      period: "Letzte 12 Monate",
+      contributions: "Beitr\xE4ge",
+      activeDays: "Aktive Tage",
+      currentStreak: "Aktuelle Serie",
+      longestStreak: "L\xE4ngste Serie",
+      day: { one: "Tag", other: "Tage" },
+      average: (n) => `\xD8 ${n}/Woche`,
+      months: ["Jan", "Feb", "M\xE4r", "Apr", "Mai", "Jun", "Jul", "Aug", "Sep", "Okt", "Nov", "Dez"],
+      alt: "Beitr\xE4ge, aktive Tage und Serien der letzten 12 Monate"
+    }
+  },
+  pt: {
+    locale: "pt-BR",
+    titles: { expertise: "Especialidades", specs: "Especifica\xE7\xF5es t\xE9cnicas", activity: "Atividade" },
+    activity: {
+      period: "\xDAltimos 12 meses",
+      contributions: "Contribui\xE7\xF5es",
+      activeDays: "Dias ativos",
+      currentStreak: "Sequ\xEAncia atual",
+      longestStreak: "Maior sequ\xEAncia",
+      day: { one: "dia", other: "dias" },
+      average: (n) => `m\xE9dia ${n}/sem`,
+      months: ["Jan", "Fev", "Mar", "Abr", "Mai", "Jun", "Jul", "Ago", "Set", "Out", "Nov", "Dez"],
+      alt: "contribui\xE7\xF5es, dias ativos e sequ\xEAncias dos \xFAltimos 12 meses"
+    }
+  }
+};
+function formatNumber(n, language) {
+  return n.toLocaleString(LANGUAGES[language].locale).replace(/ /g, "\xA0");
+}
+function days(n, language) {
+  const { locale, activity: activity3 } = LANGUAGES[language];
+  return activity3.day[new Intl.PluralRules(locale).select(n)] ?? activity3.day.other;
+}
+
 // src/render/theme.js
 var ACCENTS = {
   blue: { light: "#0071E3", dark: "#2997FF" },
@@ -21626,15 +21712,18 @@ async function loadConfig(path) {
 function normalize(raw, file = "vitrine.yml") {
   const check = checker(file);
   check.object(raw, "The file");
-  check.keys(raw, ["login", "wallpaper", "accent", "hero", "expertise", "specs", "activity", "links"], "The file");
+  check.keys(raw, ["login", "language", "wallpaper", "accent", "hero", "expertise", "specs", "activity", "links"], "The file");
+  const language = check.oneOf(raw.language ?? "en", Object.keys(LANGUAGES), "language");
+  const { titles } = LANGUAGES[language];
   const config = {
     login: check.optionalString(raw.login, "login"),
+    language,
     wallpaper: check.oneOf(raw.wallpaper ?? "tide", Object.keys(WALLPAPERS), "wallpaper"),
     accent: check.oneOf(raw.accent ?? "blue", Object.keys(ACCENTS), "accent"),
     hero: raw.hero === void 0 ? null : hero(raw.hero, check),
-    expertise: raw.expertise === void 0 ? null : expertise2(raw.expertise, check),
-    specs: raw.specs === void 0 ? null : specs(raw.specs, check),
-    activity: activity(raw.activity, check),
+    expertise: raw.expertise === void 0 ? null : expertise2(raw.expertise, check, titles),
+    specs: raw.specs === void 0 ? null : specs(raw.specs, check, titles),
+    activity: activity(raw.activity, check, titles),
     links: links(raw.links ?? [], check)
   };
   const sections = [config.hero, config.expertise, config.specs, config.activity, config.links.length];
@@ -21663,7 +21752,7 @@ function hero(raw, check) {
     })
   };
 }
-function expertise2(raw, check) {
+function expertise2(raw, check, titles) {
   check.object(raw, "expertise");
   check.keys(raw, ["title", "tiles"], "expertise");
   const tiles = check.list(raw.tiles, "expertise.tiles", { min: 1, max: 7 }).map((tile, i) => {
@@ -21687,14 +21776,14 @@ function expertise2(raw, check) {
       }
     }
   }
-  return { title: check.optionalString(raw.title, "expertise.title") ?? "Expertise", tiles };
+  return { title: check.optionalString(raw.title, "expertise.title") ?? titles.expertise, tiles };
 }
-function specs(raw, check) {
+function specs(raw, check, titles) {
   check.object(raw, "specs");
   check.keys(raw, ["title", "rows"], "specs");
   const rows = check.list(raw.rows, "specs.rows", { min: 1 });
   return {
-    title: check.optionalString(raw.title, "specs.title") ?? "Tech specs",
+    title: check.optionalString(raw.title, "specs.title") ?? titles.specs,
     rows: rows.map((row, i) => {
       const at = `specs.rows[${i}]`;
       check.object(row, at);
@@ -21717,12 +21806,12 @@ function specItem(item, at, check) {
   const slug = check.icon(item.icon, `${at}.icon`);
   return { icon: slug, label: check.optionalString(item.label, `${at}.label`) ?? brandTitle(slug) };
 }
-function activity(raw, check) {
+function activity(raw, check, titles) {
   if (raw === void 0 || raw === false) return null;
-  if (raw === true) return { title: "Activity" };
+  if (raw === true) return { title: titles.activity };
   check.object(raw, "activity");
   check.keys(raw, ["title"], "activity");
-  return { title: check.optionalString(raw.title, "activity.title") ?? "Activity" };
+  return { title: check.optionalString(raw.title, "activity.title") ?? titles.activity };
 }
 var MAX_LINK_LABEL = 24;
 function links(raw, check) {
@@ -21834,20 +21923,20 @@ async function fetchCalendar(login, token) {
   return calendar;
 }
 function summarize(calendar) {
-  const days = calendar.weeks.flatMap((week) => week.contributionDays);
+  const days2 = calendar.weeks.flatMap((week) => week.contributionDays);
   let longestStreak = 0;
   let run2 = 0;
-  for (const day of days) {
+  for (const day of days2) {
     run2 = day.contributionCount > 0 ? run2 + 1 : 0;
     longestStreak = Math.max(longestStreak, run2);
   }
   let currentStreak = 0;
-  let i = days.length - 1;
-  if (days[i]?.contributionCount === 0) i -= 1;
-  for (; i >= 0 && days[i].contributionCount > 0; i -= 1) currentStreak += 1;
+  let i = days2.length - 1;
+  if (days2[i]?.contributionCount === 0) i -= 1;
+  for (; i >= 0 && days2[i].contributionCount > 0; i -= 1) currentStreak += 1;
   return {
     total: calendar.totalContributions,
-    activeDays: days.filter((day) => day.contributionCount > 0).length,
+    activeDays: days2.filter((day) => day.contributionCount > 0).length,
     currentStreak,
     longestStreak,
     weeks: calendar.weeks.map((week) => ({
@@ -21860,24 +21949,24 @@ function summarize(calendar) {
 // src/render/cards/activity.js
 var INSET = 36;
 var HEIGHT = 280;
-var MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-function activity2({ title }, stats, theme2) {
+function activity2({ title }, stats, theme2, language = "en") {
   const span = CARD_WIDTH - INSET * 2;
-  return section(theme2, { title, aside: "Last 12 months" }, HEIGHT, [
+  const words = LANGUAGES[language].activity;
+  return section(theme2, { title, aside: words.period }, HEIGHT, [
     surface(theme2, { y: CONTENT_TOP, height: HEIGHT }),
-    figures(stats, theme2, span),
+    figures(stats, theme2, span, language),
     `<path d="M${INSET} ${CONTENT_TOP + 128.5}H${CARD_WIDTH - INSET}" stroke="${theme2.separator}"/>`,
-    chart(stats, theme2, span)
+    chart(stats, theme2, span, words)
   ].join("\n"));
 }
-function figures(stats, theme2, span) {
-  const days = (n) => n === 1 ? "day" : "days";
-  const format = (n) => n.toLocaleString("en-US");
+function figures(stats, theme2, span, language) {
+  const words = LANGUAGES[language].activity;
+  const format = (n) => formatNumber(n, language);
   const items = [
-    ["Contributions", format(stats.total)],
-    ["Active days", format(stats.activeDays)],
-    ["Current streak", format(stats.currentStreak), days(stats.currentStreak)],
-    ["Longest streak", format(stats.longestStreak), days(stats.longestStreak)]
+    [words.contributions, format(stats.total)],
+    [words.activeDays, format(stats.activeDays)],
+    [words.currentStreak, format(stats.currentStreak), days(stats.currentStreak, language)],
+    [words.longestStreak, format(stats.longestStreak), days(stats.longestStreak, language)]
   ];
   return items.map(([label, value, unit], i) => {
     const x = round(INSET + i * span / items.length);
@@ -21888,7 +21977,7 @@ function figures(stats, theme2, span) {
     ].join("\n");
   }).join("\n");
 }
-function chart({ weeks, total }, theme2, span) {
+function chart({ weeks, total }, theme2, span, words) {
   const baseline = CONTENT_TOP + 232;
   const tallest = 80;
   const step = span / weeks.length;
@@ -21907,14 +21996,14 @@ function chart({ weeks, total }, theme2, span) {
     const month = (/* @__PURE__ */ new Date(`${week.start}T00:00:00Z`)).getUTCMonth();
     const roomForLabel = x - lastLabelX > 36 && x < CARD_WIDTH - 60;
     if (previousMonth !== null && month !== previousMonth && roomForLabel) {
-      labels.push(text(MONTHS[month], { font: "text-500", size: 12, x, y: CONTENT_TOP + 256, fill: theme2.tertiary }));
+      labels.push(text(words.months[month], { font: "text-500", size: 12, x, y: CONTENT_TOP + 256, fill: theme2.tertiary }));
       lastLabelX = x;
     }
     previousMonth = month;
   });
   const average = total / weeks.length;
   const averageY = round(baseline - barHeight(average));
-  const averageLabel = `avg ${Math.round(average)}/wk`;
+  const averageLabel = words.average(Math.round(average));
   const labelWidth = round(measure(averageLabel, "text-500", 12) + 12);
   return [
     ...bars,
@@ -22094,7 +22183,7 @@ function renderCards(config, { stats = null } = {}) {
     const colors = theme(mode, config.accent);
     if (config.expertise) cards.push({ file: `expertise-${mode}.svg`, svg: expertise(config.expertise, colors) });
     if (config.specs) cards.push({ file: `specs-${mode}.svg`, svg: specs2(config.specs, colors) });
-    if (config.activity && stats) cards.push({ file: `activity-${mode}.svg`, svg: activity2(config.activity, stats, colors) });
+    if (config.activity && stats) cards.push({ file: `activity-${mode}.svg`, svg: activity2(config.activity, stats, colors, config.language) });
   }
   config.links.forEach((entry, i) => cards.push({ file: entry.file, svg: link(entry, i, config) }));
   return cards;
@@ -22129,7 +22218,7 @@ function snippet(config, folder, { activity: activity3 }) {
     blocks.push(themed("specs", alt));
   }
   if (config.activity && activity3) {
-    blocks.push(themed("activity", `${config.activity.title}: contributions, active days and streaks over the last 12 months.`));
+    blocks.push(themed("activity", `${config.activity.title}: ${LANGUAGES[config.language].activity.alt}.`));
   }
   if (config.links.length) {
     const anchors = config.links.map((entry) => `  <a href="${escape(entry.url)}"><img src="${path(entry.file)}" alt="${escape(entry.label)}"></a>`);
