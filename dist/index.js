@@ -7370,8 +7370,35 @@ var require_dist = __commonJS({
   }
 });
 
-// src/action.js
+// src/commit.js
 import { execFileSync, spawnSync } from "node:child_process";
+var IDENTITY = [
+  "-c",
+  "user.name=github-actions[bot]",
+  "-c",
+  "user.email=41898282+github-actions[bot]@users.noreply.github.com",
+  "-c",
+  "commit.gpgsign=false"
+];
+function commit(folder, message, { cwd, attempts = 3, log = console.log } = {}) {
+  const git = (...args) => execFileSync("git", args, { cwd, stdio: ["ignore", "ignore", "inherit"] });
+  const staged = () => spawnSync("git", ["diff", "--cached", "--quiet"], { cwd }).status !== 0;
+  for (let attempt = 1; ; attempt++) {
+    git("add", "--all", "--", folder);
+    if (!staged()) {
+      log("Cards are up to date.");
+      return;
+    }
+    git(...IDENTITY, "commit", "--quiet", "--message", message);
+    const push = spawnSync("git", ["push", "--quiet"], { cwd, encoding: "utf8" });
+    if (push.status === 0) return;
+    if (attempt === attempts) throw new Error(`Could not push the cards after ${attempts} attempts.
+${push.stderr.trim()}`);
+    log("The branch moved while the cards were rendering. Trying again on top of it.");
+    git("fetch", "--quiet");
+    git("reset", "--quiet", "@{upstream}");
+  }
+}
 
 // src/config.js
 var import_yaml = __toESM(require_dist(), 1);
@@ -22277,25 +22304,6 @@ async function main() {
   console.log(`Wrote ${cards.length} files to ${out}.`);
   if (removed.length) console.log(`Removed cards the config no longer makes: ${removed.join(", ")}.`);
   if (input("commit") === "true") commit(out, input("commit-message"));
-}
-function commit(folder, message) {
-  const git = (...args) => execFileSync("git", args, { stdio: "inherit" });
-  git("add", "--all", "--", folder);
-  if (spawnSync("git", ["diff", "--cached", "--quiet"]).status === 0) {
-    console.log("Cards are up to date.");
-    return;
-  }
-  git(
-    "-c",
-    "user.name=github-actions[bot]",
-    "-c",
-    "user.email=41898282+github-actions[bot]@users.noreply.github.com",
-    "commit",
-    "--quiet",
-    "--message",
-    message
-  );
-  git("push", "--quiet");
 }
 var command = (message) => message.replace(/%/g, "%25").replace(/\r/g, "%0D").replace(/\n/g, "%0A");
 main().catch((error) => {
