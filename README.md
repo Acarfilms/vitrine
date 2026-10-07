@@ -208,7 +208,7 @@ With Node 22 or later:
 npx github:Acarfilms/vitrine --config vitrine.yml --out vitrine
 ```
 
-Add `--snippet` to print the README markup instead of the list of files, or `--help` for the other options. The activity card also needs `login` in the config and a token:
+Add `--snippet` to print the README markup instead of the list of files, or `--help` for the other options. Use `--version` (or `-v`) to print the version and exit. The activity card also needs `login` in the config and a token:
 
 ```sh
 GITHUB_TOKEN=$(gh auth token) npx github:Acarfilms/vitrine
