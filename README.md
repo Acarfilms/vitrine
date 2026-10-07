@@ -160,9 +160,10 @@ Contributions, active days and streaks over the last 12 months, with a bar for e
 links:
   - { icon: linkedin, label: LinkedIn, url: https://www.linkedin.com/in/jane }
   - { icon: x, label: X, url: https://x.com/jane }
+  - { icon: globe, label: Email, url: 'mailto:jane@example.com' }
 ```
 
-Each link becomes a separate glass button, so each one is clickable in the README. You can add up to six, with labels of up to 24 characters and URLs that start with `http://` or `https://`.
+Each link becomes a separate glass button, so each one is clickable in the README. You can add up to six, with labels of up to 24 characters and URLs that start with `http://`, `https://` or `mailto:`.
 
 ## Wallpapers
 
@@ -186,7 +187,7 @@ Hero widgets and links can also use these symbols:
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="docs/symbols-dark.svg">
-  <img src="docs/symbols-light.svg" width="100%" alt="Symbols: location, briefcase, building, code, terminal, globe, layers, calendar, appearance, book.">
+  <img src="docs/symbols-light.svg" width="100%" alt="Symbols: location, briefcase, building, code, terminal, globe, layers, calendar, appearance, book, mail.">
 </picture>
 
 ## Action inputs
@@ -208,7 +209,7 @@ With Node 22 or later:
 npx github:Acarfilms/vitrine --config vitrine.yml --out vitrine
 ```
 
-Add `--snippet` to print the README markup instead of the list of files, or `--help` for the other options. The activity card also needs `login` in the config and a token:
+Add `--snippet` to print the README markup instead of the list of files, or `--help` for the other options. Use `--version` (or `-v`) to print the version and exit. The activity card also needs `login` in the config and a token:
 
 ```sh
 GITHUB_TOKEN=$(gh auth token) npx github:Acarfilms/vitrine

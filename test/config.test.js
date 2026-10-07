@@ -78,11 +78,20 @@ test('tiles that share a row take at most three icons', () => {
   assert.doesNotThrow(() => normalize({ expertise: { tiles: [first, crowded] } }), 'a leftover tile spans the full width');
 });
 
-test('links must be absolute URLs', () => {
-  assert.throws(
-    () => normalize({ links: [{ ...link('GitHub'), url: 'github.com/ada' }] }),
-    /links\[0\].url should start with http:\/\/ or https:\/\//,
-  );
+test('links accept HTTP, HTTPS and mailto prefixes', () => {
+  for (const url of ['http://example.com', 'https://example.com', 'mailto:ada@example.com', 'mailto:ada@example.com?subject=Hello%20Ada&body=Hi', 'mailto:', 'mailto:?subject=Hello']) {
+    assert.equal(normalize({ links: [{ ...link('Email'), url }] }).links[0].url, url);
+  }
+});
+
+test('links reject unsupported schemes and relative URLs', () => {
+  for (const url of ['github.com/ada', '/profile', '//example.com', 'javascript:alert(1)', 'data:text/html,test', 'file:///tmp/test', 'tel:123', 'prefix-mailto:ada@example.com', 'MAILTO:ada@example.com']) {
+    assert.throws(
+      () => normalize({ links: [{ ...link('Email'), url }] }),
+      (error) => error instanceof ConfigError && error.message.includes('links[0].url should start with http://, https:// or mailto:'),
+      url,
+    );
+  }
 });
 
 test('each link gets its own file', () => {

@@ -4,6 +4,7 @@ import { loadConfig, normalize } from '../src/config.js';
 import { formatNumber, LANGUAGES } from '../src/language.js';
 import { renderCards } from '../src/render/index.js';
 import { WALLPAPERS } from '../src/render/wallpaper.js';
+import { icon } from '../src/render/icons.js';
 import { snippet } from '../src/snippet.js';
 
 const stats = {
@@ -47,6 +48,21 @@ test('every wallpaper renders', () => {
   }
 });
 
+test('mail symbols render in hero widgets and link buttons', () => {
+  const config = normalize({
+    hero: { name: 'Ada', widgets: [{ icon: 'mail', label: 'Email', value: 'ada@example.com' }] },
+    links: [{ icon: 'mail', label: 'Email', url: 'https://example.com/contact' }],
+  });
+  const cards = renderCards(config);
+  assert.deepEqual(cards.map(({ file }) => file), ['hero.svg', 'link-email.svg']);
+  const symbol = icon('mail', { x: 0, y: 0, color: '#FFFFFF' });
+  for (const { file, svg } of cards) {
+    assert.ok(svg.includes(symbol.slice(symbol.indexOf('>') + 1, -4)), file);
+    assert.doesNotMatch(svg, /NaN|undefined|\[object/, file);
+  }
+  assert.match(symbol, /stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/);
+});
+
 test('long text is cut to fit instead of spilling out', () => {
   const long = 'An extraordinarily long piece of text that no card has room for';
   const config = normalize({
@@ -68,6 +84,14 @@ test('the snippet pairs light and dark files and escapes alt text', () => {
   assert.match(markup, /srcset="assets\/cards\/specs-dark.svg"/);
   assert.match(markup, /<img src="assets\/cards\/specs-light.svg"/);
   assert.match(markup, /<a href="https:\/\/github.com\/ada"><img src="assets\/cards\/link-github.svg" alt="GitHub"><\/a>/);
+});
+
+test('the snippet escapes mailto attributes without changing URI encoding', () => {
+  const config = normalize({
+    links: [{ icon: 'globe', label: 'Email', url: 'mailto:ada@example.com?subject=Hello%20Ada&body="<Hi>"' }],
+  });
+  const markup = snippet(config, 'cards', { activity: false });
+  assert.ok(markup.includes('<a href="mailto:ada@example.com?subject=Hello%20Ada&amp;body=&quot;&lt;Hi&gt;&quot;"><img src="cards/link-email.svg" alt="Email"></a>'));
 });
 
 test('the activity card speaks the configured language', () => {
