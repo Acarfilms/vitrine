@@ -68,3 +68,11 @@ test('the snippet pairs light and dark files and escapes alt text', () => {
   assert.match(markup, /<img src="assets\/cards\/specs-light.svg"/);
   assert.match(markup, /<a href="https:\/\/github.com\/ada"><img src="assets\/cards\/link-github.svg" alt="GitHub"><\/a>/);
 });
+
+test('the snippet escapes mailto attributes without changing URI encoding', () => {
+  const config = normalize({
+    links: [{ icon: 'globe', label: 'Email', url: 'mailto:ada@example.com?subject=Hello%20Ada&body="<Hi>"' }],
+  });
+  const markup = snippet(config, 'cards', { activity: false });
+  assert.ok(markup.includes('<a href="mailto:ada@example.com?subject=Hello%20Ada&amp;body=&quot;&lt;Hi&gt;&quot;"><img src="cards/link-email.svg" alt="Email"></a>'));
+});
