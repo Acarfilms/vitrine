@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased
+
+- The action no longer fails when the branch gets a new commit while it runs, for example when GitHub starts two runs for the same push. It puts its cards on top of the new commits and pushes again.
+
 ## 1.1.0 (2026-10-07)
 
 - The CLI supports `--version` (or `-v`) to print the package version and exit.

@@ -41,6 +41,7 @@ Check both themes when you touch a themed card. Open the `-light` and `-dark` fi
 | `src/render/wallpaper.js` | The wallpapers. |
 | `src/run.js` | Renders the cards, writes the files and removes stale ones. Shared by the CLI and the action. |
 | `src/action.js`, `src/cli.js` | The two entry points. |
+| `src/commit.js` | Commits and pushes the cards from the action, and tries again if the branch moved. |
 | `test/` | Tests, run with `node --test`. |
 
 ## Before you open a pull request
