@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 1.1.0 (2026-10-07)
 
 - The CLI supports `--version` (or `-v`) to print the package version and exit.
 - Link buttons accept `mailto:` URLs for email links.

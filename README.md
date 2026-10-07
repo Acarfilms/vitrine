@@ -160,7 +160,7 @@ Contributions, active days and streaks over the last 12 months, with a bar for e
 links:
   - { icon: linkedin, label: LinkedIn, url: https://www.linkedin.com/in/jane }
   - { icon: x, label: X, url: https://x.com/jane }
-  - { icon: globe, label: Email, url: 'mailto:jane@example.com' }
+  - { icon: mail, label: Email, url: 'mailto:jane@example.com' }
 ```
 
 Each link becomes a separate glass button, so each one is clickable in the README. You can add up to six, with labels of up to 24 characters and URLs that start with `http://`, `https://` or `mailto:`.
