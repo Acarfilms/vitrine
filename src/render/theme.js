@@ -7,6 +7,9 @@ export const ACCENTS = {
   orange: { light: '#C93400', dark: '#FF9F0A' },
   green: { light: '#248A3D', dark: '#30D158' },
   teal: { light: '#0071A4', dark: '#40C8E0' },
+  red: { light: '#D70015', dark: '#FF453A' },
+  yellow: { light: '#B25000', dark: '#FFD60A' },
+  mint: { light: '#0C817B', dark: '#63E6E2' },
 };
 
 // Dark surfaces sit on GitHub's own dark canvas (#0D1117), not pure black.
