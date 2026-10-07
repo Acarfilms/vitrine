@@ -102,3 +102,22 @@ test('each link gets its own file', () => {
 test('an empty config is an error, not an empty folder', () => {
   assert.throws(() => normalize({}), /nothing to render/);
 });
+
+test('language defaults to English and translates the default titles', () => {
+  const card = { tiles: [{ eyebrow: 'Web', headline: 'Fast' }] };
+  const specs = { rows: [{ label: 'Web', items: ['react'] }] };
+  assert.equal(normalize({ activity: true }).language, 'en');
+
+  const config = normalize({ language: 'es', expertise: card, specs, activity: true });
+  assert.equal(config.expertise.title, 'Especialidades');
+  assert.equal(config.specs.title, 'Especificaciones técnicas');
+  assert.deepEqual(config.activity, { title: 'Actividad' });
+});
+
+test('a custom title wins over the translated one', () => {
+  assert.deepEqual(normalize({ language: 'de', activity: { title: 'Dieses Jahr' } }).activity, { title: 'Dieses Jahr' });
+});
+
+test('rejects an unknown language', () => {
+  assert.throws(() => normalize({ language: 'klingon', activity: true }), /language should be one of en, es, fr, de, pt/);
+});

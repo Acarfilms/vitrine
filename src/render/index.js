@@ -18,7 +18,7 @@ export function renderCards(config, { stats = null } = {}) {
     const colors = theme(mode, config.accent);
     if (config.expertise) cards.push({ file: `expertise-${mode}.svg`, svg: expertise(config.expertise, colors) });
     if (config.specs) cards.push({ file: `specs-${mode}.svg`, svg: specs(config.specs, colors) });
-    if (config.activity && stats) cards.push({ file: `activity-${mode}.svg`, svg: activity(config.activity, stats, colors) });
+    if (config.activity && stats) cards.push({ file: `activity-${mode}.svg`, svg: activity(config.activity, stats, colors, config.language) });
   }
 
   config.links.forEach((entry, i) => cards.push({ file: entry.file, svg: link(entry, i, config) }));

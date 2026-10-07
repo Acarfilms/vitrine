@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { loadConfig, normalize } from '../src/config.js';
+import { formatNumber, LANGUAGES } from '../src/language.js';
 import { renderCards } from '../src/render/index.js';
 import { WALLPAPERS } from '../src/render/wallpaper.js';
 import { icon } from '../src/render/icons.js';
@@ -91,4 +92,39 @@ test('the snippet escapes mailto attributes without changing URI encoding', () =
   });
   const markup = snippet(config, 'cards', { activity: false });
   assert.ok(markup.includes('<a href="mailto:ada@example.com?subject=Hello%20Ada&amp;body=&quot;&lt;Hi&gt;&quot;"><img src="cards/link-email.svg" alt="Email"></a>'));
+});
+
+test('the activity card speaks the configured language', () => {
+  const config = normalize({ language: 'es', activity: true });
+  const [card] = renderCards(config, { stats: { ...stats, total: 12_345, currentStreak: 1 } });
+
+  for (const words of ['Actividad', 'Últimos 12 meses', 'Contribuciones', 'Días activos', 'Racha más larga', '12.345', 'media ', '>Ene<']) {
+    assert.ok(card.svg.includes(words), `missing "${words}"`);
+  }
+  assert.match(card.svg, />1<tspan[^>]*>día</, 'one day is singular');
+  assert.doesNotMatch(card.svg, /Contributions|Last 12 months|avg /);
+});
+
+test('every language has every word', () => {
+  const shape = (value) => (typeof value === 'object' && !Array.isArray(value)
+    ? Object.fromEntries(Object.entries(value).map(([key, inner]) => [key, shape(inner)]))
+    : typeof value);
+  for (const [code, words] of Object.entries(LANGUAGES)) {
+    assert.deepEqual(shape(words), shape(LANGUAGES.en), code);
+    assert.equal(words.activity.months.length, 12, code);
+
+    const [card] = renderCards(normalize({ language: code, activity: true }), { stats });
+    assert.doesNotMatch(card.svg, /NaN|undefined|\[object/, code);
+  }
+});
+
+test('numbers are grouped with characters the embedded font has', () => {
+  assert.equal(formatNumber(12_345, 'en'), '12,345');
+  assert.equal(formatNumber(12_345, 'de'), '12.345');
+  assert.equal(formatNumber(12_345, 'fr'), '12 345');
+});
+
+test('the activity alt text follows the language', () => {
+  const config = normalize({ language: 'fr', activity: true });
+  assert.match(snippet(config, 'vitrine', { activity: true }), /alt="Activité: contributions, jours actifs et séries des 12 derniers mois."/);
 });

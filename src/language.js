@@ -1,0 +1,90 @@
+// The text Vitrine writes by itself, as opposed to text from the config, in each language
+// the `language` option accepts. Adding a language means adding one entry here.
+export const LANGUAGES = {
+  en: {
+    locale: 'en-US',
+    titles: { expertise: 'Expertise', specs: 'Tech specs', activity: 'Activity' },
+    activity: {
+      period: 'Last 12 months',
+      contributions: 'Contributions',
+      activeDays: 'Active days',
+      currentStreak: 'Current streak',
+      longestStreak: 'Longest streak',
+      day: { one: 'day', other: 'days' },
+      average: (n) => `avg ${n}/wk`,
+      months: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+      alt: 'contributions, active days and streaks over the last 12 months',
+    },
+  },
+  es: {
+    locale: 'es-ES',
+    titles: { expertise: 'Especialidades', specs: 'Especificaciones técnicas', activity: 'Actividad' },
+    activity: {
+      period: 'Últimos 12 meses',
+      contributions: 'Contribuciones',
+      activeDays: 'Días activos',
+      currentStreak: 'Racha actual',
+      longestStreak: 'Racha más larga',
+      day: { one: 'día', other: 'días' },
+      average: (n) => `media ${n}/sem`,
+      months: ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'],
+      alt: 'contribuciones, días activos y rachas de los últimos 12 meses',
+    },
+  },
+  fr: {
+    locale: 'fr-FR',
+    titles: { expertise: 'Expertise', specs: 'Caractéristiques techniques', activity: 'Activité' },
+    activity: {
+      period: '12 derniers mois',
+      contributions: 'Contributions',
+      activeDays: 'Jours actifs',
+      currentStreak: 'Série actuelle',
+      longestStreak: 'Plus longue série',
+      day: { one: 'jour', other: 'jours' },
+      average: (n) => `moy. ${n}/sem.`,
+      months: ['Janv', 'Févr', 'Mars', 'Avr', 'Mai', 'Juin', 'Juil', 'Août', 'Sept', 'Oct', 'Nov', 'Déc'],
+      alt: 'contributions, jours actifs et séries des 12 derniers mois',
+    },
+  },
+  de: {
+    locale: 'de-DE',
+    titles: { expertise: 'Kompetenzen', specs: 'Technische Daten', activity: 'Aktivität' },
+    activity: {
+      period: 'Letzte 12 Monate',
+      contributions: 'Beiträge',
+      activeDays: 'Aktive Tage',
+      currentStreak: 'Aktuelle Serie',
+      longestStreak: 'Längste Serie',
+      day: { one: 'Tag', other: 'Tage' },
+      average: (n) => `Ø ${n}/Woche`,
+      months: ['Jan', 'Feb', 'Mär', 'Apr', 'Mai', 'Jun', 'Jul', 'Aug', 'Sep', 'Okt', 'Nov', 'Dez'],
+      alt: 'Beiträge, aktive Tage und Serien der letzten 12 Monate',
+    },
+  },
+  pt: {
+    locale: 'pt-BR',
+    titles: { expertise: 'Especialidades', specs: 'Especificações técnicas', activity: 'Atividade' },
+    activity: {
+      period: 'Últimos 12 meses',
+      contributions: 'Contribuições',
+      activeDays: 'Dias ativos',
+      currentStreak: 'Sequência atual',
+      longestStreak: 'Maior sequência',
+      day: { one: 'dia', other: 'dias' },
+      average: (n) => `média ${n}/sem`,
+      months: ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'],
+      alt: 'contribuições, dias ativos e sequências dos últimos 12 meses',
+    },
+  },
+};
+
+// French groups thousands with a narrow no-break space, which the embedded font subset
+// doesn't include. A regular no-break space looks the same at these sizes.
+export function formatNumber(n, language) {
+  return n.toLocaleString(LANGUAGES[language].locale).replace(/ /g, ' ');
+}
+
+export function days(n, language) {
+  const { locale, activity } = LANGUAGES[language];
+  return activity.day[new Intl.PluralRules(locale).select(n)] ?? activity.day.other;
+}

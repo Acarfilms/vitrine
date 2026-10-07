@@ -93,6 +93,7 @@ Every section is optional, but the file needs at least one.
 | --- | --- | --- |
 | `wallpaper` | `tide` | Background of the hero and the link buttons: `tide`, `dusk` or `graphite`. |
 | `accent` | `blue` | Color of the eyebrows and the activity chart: `blue`, `indigo`, `purple`, `pink`, `orange`, `green` or `teal`. |
+| `language` | `en` | Language of the text Vitrine writes itself, such as the activity card and the default titles: `en`, `es`, `fr`, `de` or `pt`. Your own text is used as written. |
 | `login` | Repository owner | Whose contribution calendar to read. Only needed when running Vitrine outside GitHub Actions. |
 
 ### Hero
@@ -151,7 +152,7 @@ A row has a `label` and up to four `items`. An item is an icon, shown with the b
 activity: true    # or { title: This year }
 ```
 
-Contributions, active days and streaks over the last 12 months, with a bar for each week and a dashed line at the weekly average. It reads the same calendar GitHub draws on your profile, using the workflow's own token. Contributions to private repositories are counted only if you have turned on **Include private contributions on my profile** in your profile settings.
+Contributions, active days and streaks over the last 12 months, with a bar for each week and a dashed line at the weekly average. Its labels, month names and numbers follow `language`. It reads the same calendar GitHub draws on your profile, using the workflow's own token. Contributions to private repositories are counted only if you have turned on **Include private contributions on my profile** in your profile settings.
 
 ### Links
 

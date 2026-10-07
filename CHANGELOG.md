@@ -5,6 +5,7 @@
 - The CLI supports `--version` (or `-v`) to print the package version and exit.
 - Link buttons accept `mailto:` URLs for email links.
 - Hero widgets and link buttons can use the `mail` symbol.
+- A `language` option translates the activity card and the default card titles into Spanish, French, German or Portuguese, and formats numbers the local way.
 
 ## 1.0.1 (2026-10-02)
 

@@ -1,3 +1,4 @@
+import { LANGUAGES } from './language.js';
 import { escape } from './render/svg.js';
 
 const sentence = (value) => (/[.!?]$/.test(value) ? value : `${value}.`);
@@ -37,7 +38,7 @@ export function snippet(config, folder, { activity }) {
   }
 
   if (config.activity && activity) {
-    blocks.push(themed('activity', `${config.activity.title}: contributions, active days and streaks over the last 12 months.`));
+    blocks.push(themed('activity', `${config.activity.title}: ${LANGUAGES[config.language].activity.alt}.`));
   }
 
   if (config.links.length) {
