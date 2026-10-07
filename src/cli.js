@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+import { readFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { parseArgs } from 'node:util';
 import { ConfigError } from './config.js';
@@ -15,6 +16,7 @@ Options
   -r, --readme   README the cards go in, used to work out image paths. Default: README.md
   -s, --snippet  Print the README markup instead of the list of files
   -h, --help     Show this message
+  -v, --version  Print the version
 
 The activity card needs GITHUB_TOKEN. Outside GitHub Actions, also set
 "login" in the config so Vitrine knows whose calendar to read.`;
@@ -25,10 +27,16 @@ const OPTIONS = {
   readme: { type: 'string', short: 'r', default: 'README.md' },
   snippet: { type: 'boolean', short: 's', default: false },
   help: { type: 'boolean', short: 'h', default: false },
+  version: { type: 'boolean', short: 'v', default: false },
 };
 
 async function main() {
   const { values: options } = parseArgs({ options: OPTIONS });
+  if (options.version) {
+    const { version } = JSON.parse(await readFile(new URL('../package.json', import.meta.url), 'utf8'));
+    console.log(version);
+    return;
+  }
   if (options.help) {
     console.log(HELP);
     return;

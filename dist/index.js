@@ -21733,7 +21733,7 @@ function links(raw, check) {
     check.object(entry, at);
     check.keys(entry, ["icon", "label", "url"], at);
     const url = check.string(entry.url, `${at}.url`);
-    if (!/^https?:\/\//.test(url)) check.fail(`${at}.url`, `should start with http:// or https://, got "${url}".`);
+    if (!/^(https?:\/\/|mailto:)/.test(url)) check.fail(`${at}.url`, `should start with http://, https:// or mailto:, got "${url}".`);
     const label = check.string(entry.label, `${at}.label`);
     if (label.length > MAX_LINK_LABEL) check.fail(`${at}.label`, `is ${label.length} characters long; buttons fit ${MAX_LINK_LABEL}.`);
     const file = `link-${slugify(label) || i + 1}.svg`;
