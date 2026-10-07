@@ -21,6 +21,7 @@ const SYMBOLS = {
   calendar: (c) => stroke(c, '<rect x="3.5" y="5" width="17" height="15" rx="3"/><path d="M3.5 9.8h17M8 3v4M16 3v4"/>'),
   appearance: (c) => `${stroke(c, '<circle cx="12" cy="12" r="8.5"/>')}<path d="M12 3.5a8.5 8.5 0 0 1 0 17z" fill="${c}"/>`,
   book: (c) => stroke(c, '<path d="M12 6.6C10.2 5.2 7.4 4.6 4 4.8v13.1c3.4-.2 6.2.4 8 1.8 1.8-1.4 4.6-2 8-1.8V4.8c-3.4-.2-6.2.4-8 1.8zM12 6.6v13.1"/>'),
+  mail: (c) => stroke(c, '<rect x="3.5" y="5.5" width="17" height="13" rx="2.5"/><path d="m4.5 7 7.5 5.5L19.5 7"/>'),
 };
 
 function stroke(color, shapes) {

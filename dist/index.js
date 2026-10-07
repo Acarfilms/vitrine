@@ -21321,7 +21321,8 @@ var SYMBOLS = {
   layers: (c2) => stroke(c2, '<path d="m12 3.8 8.4 4.4L12 12.6 3.6 8.2z"/><path d="m3.6 12 8.4 4.4 8.4-4.4M3.6 15.8l8.4 4.4 8.4-4.4"/>'),
   calendar: (c2) => stroke(c2, '<rect x="3.5" y="5" width="17" height="15" rx="3"/><path d="M3.5 9.8h17M8 3v4M16 3v4"/>'),
   appearance: (c2) => `${stroke(c2, '<circle cx="12" cy="12" r="8.5"/>')}<path d="M12 3.5a8.5 8.5 0 0 1 0 17z" fill="${c2}"/>`,
-  book: (c2) => stroke(c2, '<path d="M12 6.6C10.2 5.2 7.4 4.6 4 4.8v13.1c3.4-.2 6.2.4 8 1.8 1.8-1.4 4.6-2 8-1.8V4.8c-3.4-.2-6.2.4-8 1.8zM12 6.6v13.1"/>')
+  book: (c2) => stroke(c2, '<path d="M12 6.6C10.2 5.2 7.4 4.6 4 4.8v13.1c3.4-.2 6.2.4 8 1.8 1.8-1.4 4.6-2 8-1.8V4.8c-3.4-.2-6.2.4-8 1.8zM12 6.6v13.1"/>'),
+  mail: (c2) => stroke(c2, '<rect x="3.5" y="5.5" width="17" height="13" rx="2.5"/><path d="m4.5 7 7.5 5.5L19.5 7"/>')
 };
 function stroke(color, shapes) {
   return `<g stroke="${color}" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">${shapes}</g>`;
