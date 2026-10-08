@@ -1,8 +1,8 @@
 <img src="docs/banner.svg" width="100%" alt="Vitrine. For GitHub profile READMEs. Liquid Glass cards, rendered in your own repository.">
 
-Vitrine turns one YAML file into the cards on your GitHub profile: a glass hero with your name, a bento of what you do, a tech specs table, a year of activity and a button for each of your links. A GitHub Action renders them as SVG files in your own repository, so nothing depends on a hosted card service.
+Vitrine turns one YAML file into the cards on your GitHub profile: a glass hero with your name, a bento of what you do, a featured repository, a tech specs table, a year of activity and a button for each of your links. A GitHub Action renders them as SVG files in your own repository, so nothing depends on a hosted card service.
 
-The expertise, specs and activity cards come in light and dark versions and follow GitHub's theme. The hero and the link buttons carry their own wallpaper and look the same in both.
+The expertise, featured, specs and activity cards come in light and dark versions and follow GitHub's theme. The hero and the link buttons carry their own wallpaper and look the same in both.
 
 ## What it looks like
 
@@ -14,6 +14,13 @@ These are the cards on [my profile](https://github.com/Acarfilms), rendered from
   <source media="(prefers-color-scheme: dark)" srcset="docs/example/expertise-dark.svg">
   <img src="docs/example/expertise-light.svg" width="100%" alt="Expertise. Apps and web, autonomous AI, and leadership.">
 </picture>
+
+<a href="https://github.com/Acarfilms/vitrine">
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/example/featured-dark.svg">
+  <img src="docs/example/featured-light.svg" width="100%" alt="Featured: Acarfilms/vitrine.">
+</picture>
+</a>
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="docs/example/specs-dark.svg">
@@ -132,6 +139,16 @@ Each tile needs an `eyebrow` and a `headline`, and the card holds up to seven. T
 
 `headline` and `body` wrap by themselves. Pass a list instead of a string when you want to choose the line breaks. Full-width tiles show up to six `icons` as a grid of app icons; tiles that share a row fit three in the top corner. The `title` defaults to Expertise.
 
+### Featured
+
+```yaml
+featured: Acarfilms/vitrine    # or { repo: Acarfilms/vitrine, title: Latest project }
+```
+
+One public repository, the way GitHub lists it: owner and name, the description, the main language, stars and forks. A long description is cut at two lines. In the README markup the card links to the repository, so it's clickable.
+
+Like the activity card, it reads GitHub with the workflow's token, which can read any public repository. Private repositories are refused, because the card would put their name and description on your profile. The `title` defaults to Featured.
+
 ### Tech specs
 
 ```yaml
@@ -197,7 +214,7 @@ Hero widgets and links can also use these symbols:
 | `config` | `vitrine.yml` | Path to the config file. |
 | `output` | `vitrine` | Folder the cards are written to. |
 | `readme` | `README.md` | The README the cards appear in. Image paths in the run summary are relative to it. |
-| `token` | `github.token` | Token used to read the contribution calendar. |
+| `token` | `github.token` | Token used to read the contribution calendar and the featured repository. |
 | `commit` | `true` | Commit the cards when they change. Set it to `false` to handle that in a later step. |
 | `commit-message` | `Update profile cards` | Message for that commit. |
 
@@ -209,7 +226,7 @@ With Node 22 or later:
 npx github:Acarfilms/vitrine --config vitrine.yml --out vitrine
 ```
 
-Add `--snippet` to print the README markup instead of the list of files, or `--help` for the other options. Use `--version` (or `-v`) to print the version and exit. The activity card also needs `login` in the config and a token:
+Add `--snippet` to print the README markup instead of the list of files, or `--help` for the other options. Use `--version` (or `-v`) to print the version and exit. The activity and featured cards also need a token, and the activity card needs `login` in the config:
 
 ```sh
 GITHUB_TOKEN=$(gh auth token) npx github:Acarfilms/vitrine

@@ -35,6 +35,8 @@ expertise:
       body: Leading tech at IABeauty, with sprints and planning in Notion and Jira.
       icons: [notion, jira]
 
+featured: Acarfilms/vitrine
+
 specs:
   rows:
     - label: Mobile

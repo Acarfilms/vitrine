@@ -121,3 +121,15 @@ test('a custom title wins over the translated one', () => {
 test('rejects an unknown language', () => {
   assert.throws(() => normalize({ language: 'klingon', activity: true }), /language should be one of en, es, fr, de, pt/);
 });
+
+test('featured takes a repository, written short or long', () => {
+  assert.deepEqual(normalize({ featured: 'Acarfilms/vitrine' }).featured, { repo: 'Acarfilms/vitrine', title: 'Featured' });
+  assert.deepEqual(normalize({ featured: { repo: 'ada/engine', title: 'Pinned' } }).featured, { repo: 'ada/engine', title: 'Pinned' });
+  assert.equal(normalize({ language: 'es', featured: 'ada/engine' }).featured.title, 'Destacado');
+});
+
+test('featured needs an owner/name repository', () => {
+  for (const repo of ['vitrine', 'https://github.com/ada/engine', 'ada/engine/extra', 'ada/ engine']) {
+    assert.throws(() => normalize({ featured: repo }), /featured.repo should look like "owner\/name"/, repo);
+  }
+});

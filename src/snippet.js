@@ -7,7 +7,7 @@ const plain = (copy) => (Array.isArray(copy) ? copy.join(' ') : copy);
 
 // `folder` is the path from the README to the cards. The alt text spells out what each
 // image says, because screen readers and search engines can't read text inside an SVG.
-export function snippet(config, folder, { activity }) {
+export function snippet(config, folder, { activity, featured = false }) {
   const base = folder.replace(/\\/g, '/').replace(/\/+$/, '');
   const path = (file) => `${base}/${file}`;
   const themed = (name, alt) => [
@@ -29,6 +29,12 @@ export function snippet(config, folder, { activity }) {
     const { title, tiles } = config.expertise;
     const alt = [title, ...tiles.map((tile) => `${tile.eyebrow}: ${plain(tile.headline)}`)].map(sentence).join(' ');
     blocks.push(themed('expertise', alt));
+  }
+
+  // The card is an image, so the link around it is what takes readers to the repository.
+  if (config.featured && featured) {
+    const { title, repo } = config.featured;
+    blocks.push([`<a href="https://github.com/${escape(repo)}">`, themed('featured', `${title}: ${repo}.`), '</a>'].join('\n'));
   }
 
   if (config.specs) {

@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
-import { summarize } from '../src/github.js';
+import { fetchRepository, summarize } from '../src/github.js';
 
 // Builds a calendar from a list of daily counts, starting on a Sunday.
 function calendar(counts) {
@@ -35,4 +35,35 @@ test('a streak that ended yesterday is still current', () => {
 
 test('two quiet days end the current streak', () => {
   assert.equal(summarize(calendar([1, 1, 0, 0])).currentStreak, 0);
+});
+
+// Answers GraphQL requests with `payload` instead of calling GitHub.
+function respond(payload, status = 200) {
+  globalThis.fetch = async () => new Response(JSON.stringify(payload), { status });
+}
+
+test('reads a public repository', async (t) => {
+  const original = globalThis.fetch;
+  t.after(() => { globalThis.fetch = original; });
+  respond({ data: { repository: {
+    nameWithOwner: 'ada/engine', description: '  Analytical engine.  ', stargazerCount: 12, forkCount: 3, isPrivate: false,
+    primaryLanguage: { name: 'Rust', color: '#dea584' },
+  } } });
+  assert.deepEqual(await fetchRepository('ada/engine', 'token'), {
+    name: 'ada/engine', description: 'Analytical engine.', stars: 12, forks: 3, language: { name: 'Rust', color: '#dea584' },
+  });
+});
+
+test('refuses to feature a private repository', async (t) => {
+  const original = globalThis.fetch;
+  t.after(() => { globalThis.fetch = original; });
+  respond({ data: { repository: { nameWithOwner: 'ada/secret', description: 'Plans', stargazerCount: 0, forkCount: 0, isPrivate: true, primaryLanguage: null } } });
+  await assert.rejects(fetchRepository('ada/secret', 'token'), /"ada\/secret" is private/);
+});
+
+test('says which repository could not be found', async (t) => {
+  const original = globalThis.fetch;
+  t.after(() => { globalThis.fetch = original; });
+  respond({ data: { repository: null }, errors: [{ type: 'NOT_FOUND', message: 'Could not resolve' }] });
+  await assert.rejects(fetchRepository('ada/missing', 'token'), /Could not find the repository "ada\/missing"/);
 });

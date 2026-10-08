@@ -31,7 +31,7 @@ export function normalize(raw, file = 'vitrine.yml') {
   const check = checker(file);
 
   check.object(raw, 'The file');
-  check.keys(raw, ['login', 'language', 'wallpaper', 'accent', 'hero', 'expertise', 'specs', 'activity', 'links'], 'The file');
+  check.keys(raw, ['login', 'language', 'wallpaper', 'accent', 'hero', 'expertise', 'featured', 'specs', 'activity', 'links'], 'The file');
 
   const language = check.oneOf(raw.language ?? 'en', Object.keys(LANGUAGES), 'language');
   const { titles } = LANGUAGES[language];
@@ -43,14 +43,15 @@ export function normalize(raw, file = 'vitrine.yml') {
     accent: check.oneOf(raw.accent ?? 'blue', Object.keys(ACCENTS), 'accent'),
     hero: raw.hero === undefined ? null : hero(raw.hero, check),
     expertise: raw.expertise === undefined ? null : expertise(raw.expertise, check, titles),
+    featured: raw.featured === undefined ? null : featured(raw.featured, check, titles),
     specs: raw.specs === undefined ? null : specs(raw.specs, check, titles),
     activity: activity(raw.activity, check, titles),
     links: links(raw.links ?? [], check),
   };
 
-  const sections = [config.hero, config.expertise, config.specs, config.activity, config.links.length];
+  const sections = [config.hero, config.expertise, config.featured, config.specs, config.activity, config.links.length];
   if (!sections.some(Boolean)) {
-    check.fail('The file', 'has nothing to render. Add at least one of hero, expertise, specs, activity or links.');
+    check.fail('The file', 'has nothing to render. Add at least one of hero, expertise, featured, specs, activity or links.');
   }
   return config;
 }
@@ -104,6 +105,16 @@ function expertise(raw, check, titles) {
   }
 
   return { title: check.optionalString(raw.title, 'expertise.title') ?? titles.expertise, tiles };
+}
+
+// `featured: owner/name` is short for `featured: { repo: owner/name }`.
+function featured(raw, check, titles) {
+  const entry = typeof raw === 'string' ? { repo: raw } : raw;
+  check.object(entry, 'featured');
+  check.keys(entry, ['repo', 'title'], 'featured');
+  const repo = check.string(entry.repo, 'featured.repo');
+  if (!/^[\w.-]+\/[\w.-]+$/.test(repo)) check.fail('featured.repo', `should look like "owner/name", got "${repo}".`);
+  return { repo, title: check.optionalString(entry.title, 'featured.title') ?? titles.featured };
 }
 
 function specs(raw, check, titles) {

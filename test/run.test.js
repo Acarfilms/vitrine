@@ -45,3 +45,16 @@ test('image paths in the markup are relative to the README', async () => {
   });
   assert.match(markup, /<img src="cards\/hero.svg"/);
 });
+
+test('keeps the last featured card when it was skipped for lack of a token', async () => {
+  const dir = await workspace('featured: ada/engine\n');
+  const out = join(dir, 'cards');
+  const warnings = [];
+  await run({ config: join(dir, 'vitrine.yml'), out, readme: join(dir, 'README.md'), warn: (m) => warnings.push(m) });
+  await writeFile(join(out, 'featured-light.svg'), '<svg/>');
+
+  const { removed, markup } = await run({ config: join(dir, 'vitrine.yml'), out, readme: join(dir, 'README.md'), warn: quiet });
+  assert.deepEqual(removed, []);
+  assert.equal(markup.trim(), '');
+  assert.match(warnings[0], /Skipping the featured card/);
+});

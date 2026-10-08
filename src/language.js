@@ -3,7 +3,7 @@
 export const LANGUAGES = {
   en: {
     locale: 'en-US',
-    titles: { expertise: 'Expertise', specs: 'Tech specs', activity: 'Activity' },
+    titles: { expertise: 'Expertise', featured: 'Featured', specs: 'Tech specs', activity: 'Activity' },
     activity: {
       period: 'Last 12 months',
       contributions: 'Contributions',
@@ -18,7 +18,7 @@ export const LANGUAGES = {
   },
   es: {
     locale: 'es-ES',
-    titles: { expertise: 'Especialidades', specs: 'Especificaciones técnicas', activity: 'Actividad' },
+    titles: { expertise: 'Especialidades', featured: 'Destacado', specs: 'Especificaciones técnicas', activity: 'Actividad' },
     activity: {
       period: 'Últimos 12 meses',
       contributions: 'Contribuciones',
@@ -33,7 +33,7 @@ export const LANGUAGES = {
   },
   fr: {
     locale: 'fr-FR',
-    titles: { expertise: 'Expertise', specs: 'Caractéristiques techniques', activity: 'Activité' },
+    titles: { expertise: 'Expertise', featured: 'À la une', specs: 'Caractéristiques techniques', activity: 'Activité' },
     activity: {
       period: '12 derniers mois',
       contributions: 'Contributions',
@@ -48,7 +48,7 @@ export const LANGUAGES = {
   },
   de: {
     locale: 'de-DE',
-    titles: { expertise: 'Kompetenzen', specs: 'Technische Daten', activity: 'Aktivität' },
+    titles: { expertise: 'Kompetenzen', featured: 'Im Fokus', specs: 'Technische Daten', activity: 'Aktivität' },
     activity: {
       period: 'Letzte 12 Monate',
       contributions: 'Beiträge',
@@ -63,7 +63,7 @@ export const LANGUAGES = {
   },
   pt: {
     locale: 'pt-BR',
-    titles: { expertise: 'Especialidades', specs: 'Especificações técnicas', activity: 'Atividade' },
+    titles: { expertise: 'Especialidades', featured: 'Em destaque', specs: 'Especificações técnicas', activity: 'Atividade' },
     activity: {
       period: 'Últimos 12 meses',
       contributions: 'Contribuições',

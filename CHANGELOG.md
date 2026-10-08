@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- A featured card shows one of your repositories the way GitHub lists it: name, description, main language, stars and forks. It links to the repository from the README.
 - Added `red`, `yellow` and `mint` accent colors.
 
 ## 1.1.1 (2026-10-07)

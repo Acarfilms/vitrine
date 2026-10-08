@@ -128,3 +128,41 @@ test('the activity alt text follows the language', () => {
   const config = normalize({ language: 'fr', activity: true });
   assert.match(snippet(config, 'vitrine', { activity: true }), /alt="Activité: contributions, jours actifs et séries des 12 derniers mois."/);
 });
+
+const repo = { name: 'ada/engine', description: 'Analytical engine.', stars: 12_345, forks: 3, language: { name: 'Rust', color: '#dea584' } };
+
+test('the featured card shows the repository in both themes', () => {
+  const cards = renderCards(normalize({ language: 'de', featured: 'ada/engine' }), { repo });
+  assert.deepEqual(cards.map((card) => card.file), ['featured-light.svg', 'featured-dark.svg']);
+  for (const { file, svg } of cards) {
+    for (const words of ['Im Fokus', '>ada/</tspan>engine', 'Analytical engine.', 'Rust', '#dea584', '12.345']) {
+      assert.ok(svg.includes(words), `${file} is missing "${words}"`);
+    }
+    assert.doesNotMatch(svg, /NaN|undefined|\[object/, file);
+  }
+});
+
+test('the featured card skips what the repository lacks and cuts what is too long', () => {
+  const config = normalize({ featured: 'ada/engine' });
+  const [bare] = renderCards(config, { repo: { ...repo, description: null, language: null } });
+  const [full] = renderCards(config, { repo });
+  assert.ok(height(bare.svg) < height(full.svg), 'no description makes a shorter card');
+  assert.doesNotMatch(bare.svg, /<circle[^>]*r="7"/, 'no language dot');
+  assert.match(full.svg, /<circle[^>]*r="7" fill="#dea584"/, 'a dot in the language color');
+
+  const [long] = renderCards(config, { repo: { ...repo, name: `${'a'.repeat(40)}/${'b'.repeat(40)}`, description: 'word '.repeat(80) } });
+  assert.equal((long.svg.match(/class="text-400"/g) ?? []).length, 2, 'the description stops at two lines');
+  assert.match(long.svg, /…<\/text>/);
+  assert.doesNotMatch(long.svg, /a{40}\//, 'the owner gives way to the name');
+});
+
+test('the snippet links the featured card to its repository', () => {
+  const markup = snippet(normalize({ featured: 'ada/engine' }), 'cards', { activity: false, featured: true });
+  assert.match(markup, /^<a href="https:\/\/github.com\/ada\/engine">\n<picture>/);
+  assert.match(markup, /alt="Featured: ada\/engine."/);
+  assert.doesNotMatch(snippet(normalize({ featured: 'ada/engine' }), 'cards', { activity: false }), /engine/);
+});
+
+function height(svg) {
+  return Number(svg.match(/height="([\d.]+)"/)[1]);
+}
