@@ -24,7 +24,7 @@ const SYMBOLS = {
   mail: (c) => stroke(c, '<rect x="3.5" y="5.5" width="17" height="13" rx="2.5"/><path d="m4.5 7 7.5 5.5L19.5 7"/>'),
 };
 
-function stroke(color, shapes) {
+export function stroke(color, shapes) {
   return `<g stroke="${color}" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">${shapes}</g>`;
 }
 

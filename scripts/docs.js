@@ -1,10 +1,10 @@
-// Renders the images used by README.md into docs/. Set GITHUB_TOKEN to include the activity card.
+// Renders the images used by README.md into docs/. Set GITHUB_TOKEN to include the activity and featured cards.
 //
 //   GITHUB_TOKEN=$(gh auth token) npm run docs
 
 import { mkdir, rm, writeFile } from 'node:fs/promises';
 import { loadConfig, normalize } from '../src/config.js';
-import { fetchCalendar, summarize } from '../src/github.js';
+import { fetchCalendar, fetchRepository, summarize } from '../src/github.js';
 import { glass, glassDefs, ON_GLASS } from '../src/render/glass.js';
 import { icon, SYMBOL_NAMES } from '../src/render/icons.js';
 import { renderCards } from '../src/render/index.js';
@@ -82,7 +82,8 @@ for (const mode of MODE_NAMES) await save(`symbols-${mode}.svg`, symbolSheet(the
 const example = await loadConfig(new URL('../examples/vitrine.yml', import.meta.url));
 const token = process.env.GITHUB_TOKEN;
 const stats = token ? summarize(await fetchCalendar(example.login, token)) : null;
-if (!stats) console.warn('GITHUB_TOKEN is not set, so the example has no activity card.');
+const repo = token && example.featured ? await fetchRepository(example.featured.repo, token) : null;
+if (!token) console.warn('GITHUB_TOKEN is not set, so the example has no activity or featured card.');
 
 await rm(new URL('example/', DOCS), { recursive: true, force: true });
-for (const card of renderCards(example, { stats })) await save(`example/${card.file}`, card.svg);
+for (const card of renderCards(example, { stats, repo })) await save(`example/${card.file}`, card.svg);

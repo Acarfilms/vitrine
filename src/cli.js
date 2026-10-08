@@ -18,7 +18,7 @@ Options
   -h, --help     Show this message
   -v, --version  Print the version
 
-The activity card needs GITHUB_TOKEN. Outside GitHub Actions, also set
+The activity and featured cards need GITHUB_TOKEN. Outside GitHub Actions, also set
 "login" in the config so Vitrine knows whose calendar to read.`;
 
 const OPTIONS = {

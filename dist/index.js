@@ -21408,12 +21408,12 @@ var CARD_WIDTH = 840;
 var CONTENT_TOP = 64;
 var BREATHING_ROOM = 28;
 function section(theme2, { title, aside }, contentHeight, body) {
-  const heading = text(title, { font: "display-700", size: 32, x: 2, y: 38, tracking: -0.8, fill: theme2.label });
+  const heading2 = text(title, { font: "display-700", size: 32, x: 2, y: 38, tracking: -0.8, fill: theme2.label });
   const note = aside ? text(aside, { font: "text-500", size: 14, x: CARD_WIDTH - 2, y: 38, anchor: "end", fill: theme2.tertiary }) : "";
   const height = CONTENT_TOP + contentHeight + 2;
   return document(CARD_WIDTH, height + BREATHING_ROOM, `
 <g transform="translate(0 ${BREATHING_ROOM})">
-${heading}
+${heading2}
 ${note}
 ${body.trim()}
 </g>`);
@@ -21519,7 +21519,7 @@ function appIcon(slug, theme2, { x, y, size }) {
 var LANGUAGES = {
   en: {
     locale: "en-US",
-    titles: { expertise: "Expertise", specs: "Tech specs", activity: "Activity" },
+    titles: { expertise: "Expertise", featured: "Featured", specs: "Tech specs", activity: "Activity" },
     activity: {
       period: "Last 12 months",
       contributions: "Contributions",
@@ -21534,7 +21534,7 @@ var LANGUAGES = {
   },
   es: {
     locale: "es-ES",
-    titles: { expertise: "Especialidades", specs: "Especificaciones t\xE9cnicas", activity: "Actividad" },
+    titles: { expertise: "Especialidades", featured: "Destacado", specs: "Especificaciones t\xE9cnicas", activity: "Actividad" },
     activity: {
       period: "\xDAltimos 12 meses",
       contributions: "Contribuciones",
@@ -21549,7 +21549,7 @@ var LANGUAGES = {
   },
   fr: {
     locale: "fr-FR",
-    titles: { expertise: "Expertise", specs: "Caract\xE9ristiques techniques", activity: "Activit\xE9" },
+    titles: { expertise: "Expertise", featured: "\xC0 la une", specs: "Caract\xE9ristiques techniques", activity: "Activit\xE9" },
     activity: {
       period: "12 derniers mois",
       contributions: "Contributions",
@@ -21564,7 +21564,7 @@ var LANGUAGES = {
   },
   de: {
     locale: "de-DE",
-    titles: { expertise: "Kompetenzen", specs: "Technische Daten", activity: "Aktivit\xE4t" },
+    titles: { expertise: "Kompetenzen", featured: "Im Fokus", specs: "Technische Daten", activity: "Aktivit\xE4t" },
     activity: {
       period: "Letzte 12 Monate",
       contributions: "Beitr\xE4ge",
@@ -21579,7 +21579,7 @@ var LANGUAGES = {
   },
   pt: {
     locale: "pt-BR",
-    titles: { expertise: "Especialidades", specs: "Especifica\xE7\xF5es t\xE9cnicas", activity: "Atividade" },
+    titles: { expertise: "Especialidades", featured: "Em destaque", specs: "Especifica\xE7\xF5es t\xE9cnicas", activity: "Atividade" },
     activity: {
       period: "\xDAltimos 12 meses",
       contributions: "Contribui\xE7\xF5es",
@@ -21743,7 +21743,7 @@ async function loadConfig(path) {
 function normalize(raw, file = "vitrine.yml") {
   const check = checker(file);
   check.object(raw, "The file");
-  check.keys(raw, ["login", "language", "wallpaper", "accent", "hero", "expertise", "specs", "activity", "links"], "The file");
+  check.keys(raw, ["login", "language", "wallpaper", "accent", "hero", "expertise", "featured", "specs", "activity", "links"], "The file");
   const language = check.oneOf(raw.language ?? "en", Object.keys(LANGUAGES), "language");
   const { titles } = LANGUAGES[language];
   const config = {
@@ -21753,13 +21753,14 @@ function normalize(raw, file = "vitrine.yml") {
     accent: check.oneOf(raw.accent ?? "blue", Object.keys(ACCENTS), "accent"),
     hero: raw.hero === void 0 ? null : hero(raw.hero, check),
     expertise: raw.expertise === void 0 ? null : expertise2(raw.expertise, check, titles),
+    featured: raw.featured === void 0 ? null : featured(raw.featured, check, titles),
     specs: raw.specs === void 0 ? null : specs(raw.specs, check, titles),
     activity: activity(raw.activity, check, titles),
     links: links(raw.links ?? [], check)
   };
-  const sections = [config.hero, config.expertise, config.specs, config.activity, config.links.length];
+  const sections = [config.hero, config.expertise, config.featured, config.specs, config.activity, config.links.length];
   if (!sections.some(Boolean)) {
-    check.fail("The file", "has nothing to render. Add at least one of hero, expertise, specs, activity or links.");
+    check.fail("The file", "has nothing to render. Add at least one of hero, expertise, featured, specs, activity or links.");
   }
   return config;
 }
@@ -21808,6 +21809,14 @@ function expertise2(raw, check, titles) {
     }
   }
   return { title: check.optionalString(raw.title, "expertise.title") ?? titles.expertise, tiles };
+}
+function featured(raw, check, titles) {
+  const entry = typeof raw === "string" ? { repo: raw } : raw;
+  check.object(entry, "featured");
+  check.keys(entry, ["repo", "title"], "featured");
+  const repo = check.string(entry.repo, "featured.repo");
+  if (!/^[\w.-]+\/[\w.-]+$/.test(repo)) check.fail("featured.repo", `should look like "owner/name", got "${repo}".`);
+  return { repo, title: check.optionalString(entry.title, "featured.title") ?? titles.featured };
 }
 function specs(raw, check, titles) {
   check.object(raw, "specs");
@@ -21868,11 +21877,11 @@ function checker(file) {
   const fail = (at, message) => {
     throw new ConfigError(`${file}: ${at} ${message}`);
   };
-  const describe = (value) => Array.isArray(value) ? "a list" : value === null ? "empty" : `${typeof value} ${JSON.stringify(value)}`;
+  const describe2 = (value) => Array.isArray(value) ? "a list" : value === null ? "empty" : `${typeof value} ${JSON.stringify(value)}`;
   const check = {
     fail,
     object(value, at) {
-      if (value === null || typeof value !== "object" || Array.isArray(value)) fail(at, `should be a mapping, got ${describe(value)}.`);
+      if (value === null || typeof value !== "object" || Array.isArray(value)) fail(at, `should be a mapping, got ${describe2(value)}.`);
     },
     keys(value, allowed, at) {
       const unknown = Object.keys(value).find((key) => !allowed.includes(key));
@@ -21881,22 +21890,22 @@ function checker(file) {
     // YAML reads `value: 2019` as a number; treat it as the text it was meant to be.
     string(value, at) {
       if (typeof value === "number" && Number.isFinite(value)) return String(value);
-      if (typeof value !== "string" || !value.trim()) fail(at, `should be some text, got ${describe(value)}.`);
+      if (typeof value !== "string" || !value.trim()) fail(at, `should be some text, got ${describe2(value)}.`);
       return value.trim();
     },
     optionalString(value, at) {
       return value === void 0 || value === null ? null : check.string(value, at);
     },
     boolean(value, at) {
-      if (typeof value !== "boolean") fail(at, `should be true or false, got ${describe(value)}.`);
+      if (typeof value !== "boolean") fail(at, `should be true or false, got ${describe2(value)}.`);
       return value;
     },
     oneOf(value, options, at) {
-      if (!options.includes(value)) fail(at, `should be one of ${options.join(", ")}, got ${describe(value)}.`);
+      if (!options.includes(value)) fail(at, `should be one of ${options.join(", ")}, got ${describe2(value)}.`);
       return value;
     },
     list(value, at, { min = 0, max = Infinity } = {}) {
-      if (!Array.isArray(value)) fail(at, `should be a list, got ${describe(value)}.`);
+      if (!Array.isArray(value)) fail(at, `should be a list, got ${describe2(value)}.`);
       if (value.length < min) fail(at, `needs at least ${min} ${min === 1 ? "entry" : "entries"}.`);
       if (value.length > max) fail(at, `can hold at most ${max} entries, got ${value.length}.`);
       return value;
@@ -21922,7 +21931,7 @@ import { appendFile, mkdir, readdir, rm, writeFile } from "node:fs/promises";
 import { dirname, join, relative, resolve } from "node:path";
 
 // src/github.js
-var QUERY = `query ($login: String!) {
+var CALENDAR = `query ($login: String!) {
   user(login: $login) {
     contributionsCollection {
       contributionCalendar {
@@ -21932,7 +21941,17 @@ var QUERY = `query ($login: String!) {
     }
   }
 }`;
-async function fetchCalendar(login, token) {
+var REPOSITORY = `query ($owner: String!, $name: String!) {
+  repository(owner: $owner, name: $name) {
+    nameWithOwner
+    description
+    stargazerCount
+    forkCount
+    isPrivate
+    primaryLanguage { name color }
+  }
+}`;
+async function graphql(query, variables, token) {
   const response = await fetch("https://api.github.com/graphql", {
     method: "POST",
     headers: {
@@ -21940,18 +21959,40 @@ async function fetchCalendar(login, token) {
       "Content-Type": "application/json",
       "User-Agent": "vitrine"
     },
-    body: JSON.stringify({ query: QUERY, variables: { login } })
+    body: JSON.stringify({ query, variables })
   });
   const payload = await response.json().catch(() => ({}));
-  if (payload.errors?.some((error) => error.type === "NOT_FOUND")) {
+  const notFound = payload.errors?.some((error) => error.type === "NOT_FOUND") ?? false;
+  const reason = payload.errors?.map((error) => error.message).join("; ") ?? `HTTP ${response.status}`;
+  return { ok: response.ok, data: payload.data, notFound, reason };
+}
+async function fetchCalendar(login, token) {
+  const { ok, data, notFound, reason } = await graphql(CALENDAR, { login }, token);
+  if (notFound) {
     throw new Error(`"${login}" is not a personal GitHub account. The activity card only works for people, not organizations.`);
   }
-  const calendar = payload.data?.user?.contributionsCollection?.contributionCalendar;
-  if (!response.ok || !calendar) {
-    const reason = payload.errors?.map((error) => error.message).join("; ") ?? `HTTP ${response.status}`;
-    throw new Error(`Could not read the contribution calendar for "${login}": ${reason}`);
-  }
+  const calendar = data?.user?.contributionsCollection?.contributionCalendar;
+  if (!ok || !calendar) throw new Error(`Could not read the contribution calendar for "${login}": ${reason}`);
   return calendar;
+}
+async function fetchRepository(fullName, token) {
+  const [owner, name] = fullName.split("/");
+  const { ok, data, notFound, reason } = await graphql(REPOSITORY, { owner, name }, token);
+  if (notFound) {
+    throw new Error(`Could not find the repository "${fullName}". Check its name. The workflow's token can read public repositories and its own.`);
+  }
+  const repository2 = data?.repository;
+  if (!ok || !repository2) throw new Error(`Could not read the repository "${fullName}": ${reason}`);
+  if (repository2.isPrivate) {
+    throw new Error(`"${fullName}" is private. The featured card would show its name and description on your profile, so only public repositories can be featured.`);
+  }
+  return {
+    name: repository2.nameWithOwner,
+    description: repository2.description?.trim() || null,
+    stars: repository2.stargazerCount,
+    forks: repository2.forkCount,
+    language: repository2.primaryLanguage
+  };
 }
 function summarize(calendar) {
   const days2 = calendar.weeks.flatMap((week) => week.contributionDays);
@@ -22043,6 +22084,67 @@ function chart({ weeks, total }, theme2, span, words) {
     text(averageLabel, { font: "text-500", size: 12, x: INSET + 6, y: averageY - 8, fill: theme2.tertiary }),
     ...labels
   ].join("\n");
+}
+
+// src/render/cards/featured.js
+var INSET2 = 36;
+var NAME_SIZE = 28;
+var NAME_TRACKING = -0.6;
+var DESCRIPTION_SIZE = 17;
+var DESCRIPTION_LINES = 2;
+var LINE_HEIGHT = 25;
+var META_SIZE = 15;
+var GLYPHS = {
+  repo: (c2) => stroke(c2, '<path d="M5.5 18.5V5.6c0-1.2.9-2.1 2.1-2.1h10.9v13H7.6c-1.2 0-2.1.9-2.1 2.1s.9 2.1 2.1 2.1h10.9"/><path d="M9.5 16.5v4.5l1.75-1.2L13 21v-4.5"/>'),
+  star: (c2) => stroke(c2, '<path d="m12 3.8 2.5 5.1 5.6.8-4.05 3.95.95 5.6L12 16.6l-5 2.65.95-5.6L3.9 9.7l5.6-.8z"/>'),
+  fork: (c2) => stroke(c2, '<circle cx="6.5" cy="5.5" r="2"/><circle cx="17.5" cy="5.5" r="2"/><circle cx="12" cy="18.5" r="2"/><path d="M6.5 7.5v1.2c0 1.5 1.2 2.8 2.8 2.8h5.4c1.5 0 2.8-1.2 2.8-2.8V7.5M12 11.5v5"/>')
+};
+var glyph = (name, { x, y, size, color }) => `<g transform="translate(${round(x)} ${round(y)}) scale(${round(size / 24)})">${GLYPHS[name](color)}</g>`;
+function featured2({ title }, repo, theme2, language = "en") {
+  const width = CARD_WIDTH - INSET2 * 2;
+  const nameY = CONTENT_TOP + 66;
+  const description = describe(repo.description, width);
+  const descriptionY = nameY + 40;
+  const metaY = (description.length ? descriptionY + (description.length - 1) * LINE_HEIGHT : nameY) + 46;
+  const height = metaY - CONTENT_TOP + 36;
+  return section(theme2, { title }, height, [
+    surface(theme2, { y: CONTENT_TOP, height }),
+    glyph("repo", { x: INSET2, y: nameY - 25, size: 30, color: theme2.accent }),
+    heading(repo.name, theme2, INSET2 + 44, nameY, width - 44),
+    ...description.map((line, i) => text(line, { size: DESCRIPTION_SIZE, x: INSET2, y: descriptionY + i * LINE_HEIGHT, fill: theme2.secondary })),
+    meta(repo, theme2, metaY, language)
+  ].join("\n"));
+}
+function heading(fullName, theme2, x, y, maxWidth) {
+  const [owner, name] = fullName.split("/");
+  const font = "display-700";
+  const attributes = `class="${font}" x="${x}" y="${y}" font-size="${NAME_SIZE}" letter-spacing="${NAME_TRACKING}"`;
+  if (measure(`${owner}/${name}`, font, NAME_SIZE, NAME_TRACKING) <= maxWidth) {
+    return `<text ${attributes} fill="${theme2.label}"><tspan fill="${theme2.secondary}">${escape(owner)}/</tspan>${escape(name)}</text>`;
+  }
+  const shown = fit(name, font, NAME_SIZE, maxWidth, { min: 22, tracking: NAME_TRACKING });
+  return text(shown.content, { font, size: shown.size, x, y, tracking: shown.tracking, fill: theme2.label });
+}
+function describe(description, width) {
+  if (!description) return [];
+  const lines2 = wrap(description, "text-400", DESCRIPTION_SIZE, width);
+  if (lines2.length <= DESCRIPTION_LINES) return lines2;
+  const rest = lines2.slice(DESCRIPTION_LINES - 1).join(" ");
+  return [...lines2.slice(0, DESCRIPTION_LINES - 1), fit(`${rest}\u2026`, "text-400", DESCRIPTION_SIZE, width).content];
+}
+function meta({ language: code, stars, forks }, theme2, y, language) {
+  const items = [];
+  if (code) items.push({ dot: code.color ?? theme2.tertiary, label: code.name });
+  items.push({ glyph: "star", label: formatNumber(stars, language) });
+  items.push({ glyph: "fork", label: formatNumber(forks, language) });
+  let x = INSET2;
+  return items.map((item) => {
+    const mark = item.dot ? `<circle cx="${round(x + 7)}" cy="${round(y - 5)}" r="7" fill="${item.dot}"/>` : glyph(item.glyph, { x, y: y - 15, size: 20, color: theme2.secondary });
+    const label = text(item.label, { font: "text-500", size: META_SIZE, x: x + 26, y, fill: theme2.secondary });
+    x += 26 + measure(item.label, "text-500", META_SIZE) + 30;
+    return `${mark}
+${label}`;
+  }).join("\n");
 }
 
 // src/render/glass.js
@@ -22172,22 +22274,22 @@ ${text("\u2197", { font: "text-600", size: 14, x: width - 24, y: HEIGHT2 / 2 + 5
 }
 
 // src/render/cards/specs.js
-var INSET2 = 32;
+var INSET3 = 32;
 var ROW_HEIGHT = 62;
 var PADDING = 6;
 var ITEMS_MIN_X = 232;
 var ITEMS_MAX_X = 340;
 function specs2({ title, rows }, theme2) {
   const widestLabel = Math.max(...rows.map((row) => measure(row.label, "text-500", 15)));
-  const itemsX = Math.min(ITEMS_MAX_X, Math.max(ITEMS_MIN_X, INSET2 + widestLabel + 40));
+  const itemsX = Math.min(ITEMS_MAX_X, Math.max(ITEMS_MIN_X, INSET3 + widestLabel + 40));
   const columns = Math.max(...rows.map((row) => row.items.length));
-  const columnWidth = (CARD_WIDTH - INSET2 - itemsX) / columns;
+  const columnWidth = (CARD_WIDTH - INSET3 - itemsX) / columns;
   const height = rows.length * ROW_HEIGHT + PADDING * 2;
   const body = rows.map((row, i) => {
     const top = CONTENT_TOP + PADDING + i * ROW_HEIGHT;
     const middle = top + ROW_HEIGHT / 2;
-    const separator = i ? `<path d="M${INSET2} ${top + 0.5}H${CARD_WIDTH - INSET2}" stroke="${theme2.separator}"/>` : "";
-    const label = fit(row.label, "text-500", 15, itemsX - INSET2 - 24);
+    const separator = i ? `<path d="M${INSET3} ${top + 0.5}H${CARD_WIDTH - INSET3}" stroke="${theme2.separator}"/>` : "";
+    const label = fit(row.label, "text-500", 15, itemsX - INSET3 - 24);
     const cells = row.items.map((item, j) => {
       const x = itemsX + j * columnWidth;
       const name = fit(item.label, "text-500", 17, columnWidth - 44, { min: 14 });
@@ -22198,7 +22300,7 @@ function specs2({ title, rows }, theme2) {
     });
     return [
       separator,
-      text(label.content, { font: "text-500", size: 15, x: INSET2, y: middle + 5, fill: theme2.secondary }),
+      text(label.content, { font: "text-500", size: 15, x: INSET3, y: middle + 5, fill: theme2.secondary }),
       ...cells
     ].join("\n");
   });
@@ -22206,13 +22308,14 @@ function specs2({ title, rows }, theme2) {
 }
 
 // src/render/index.js
-var CARD_FILE = /^(hero|(expertise|specs|activity)-(light|dark)|link-[a-z0-9-]+)\.svg$/;
-function renderCards(config, { stats = null } = {}) {
+var CARD_FILE = /^(hero|(expertise|featured|specs|activity)-(light|dark)|link-[a-z0-9-]+)\.svg$/;
+function renderCards(config, { stats = null, repo = null } = {}) {
   const cards = [];
   if (config.hero) cards.push({ file: "hero.svg", svg: hero2(config.hero, config) });
   for (const mode of MODE_NAMES) {
     const colors = theme(mode, config.accent);
     if (config.expertise) cards.push({ file: `expertise-${mode}.svg`, svg: expertise(config.expertise, colors) });
+    if (config.featured && repo) cards.push({ file: `featured-${mode}.svg`, svg: featured2(config.featured, repo, colors, config.language) });
     if (config.specs) cards.push({ file: `specs-${mode}.svg`, svg: specs2(config.specs, colors) });
     if (config.activity && stats) cards.push({ file: `activity-${mode}.svg`, svg: activity2(config.activity, stats, colors, config.language) });
   }
@@ -22223,7 +22326,7 @@ function renderCards(config, { stats = null } = {}) {
 // src/snippet.js
 var sentence = (value) => /[.!?]$/.test(value) ? value : `${value}.`;
 var plain = (copy) => Array.isArray(copy) ? copy.join(" ") : copy;
-function snippet(config, folder, { activity: activity3 }) {
+function snippet(config, folder, { activity: activity3, featured: featured3 = false }) {
   const base = folder.replace(/\\/g, "/").replace(/\/+$/, "");
   const path = (file) => `${base}/${file}`;
   const themed = (name, alt) => [
@@ -22242,6 +22345,10 @@ function snippet(config, folder, { activity: activity3 }) {
     const { title, tiles } = config.expertise;
     const alt = [title, ...tiles.map((tile) => `${tile.eyebrow}: ${plain(tile.headline)}`)].map(sentence).join(" ");
     blocks.push(themed("expertise", alt));
+  }
+  if (config.featured && featured3) {
+    const { title, repo } = config.featured;
+    blocks.push([`<a href="https://github.com/${escape(repo)}">`, themed("featured", `${title}: ${repo}.`), "</a>"].join("\n"));
   }
   if (config.specs) {
     const { title, rows } = config.specs;
@@ -22263,14 +22370,16 @@ function snippet(config, folder, { activity: activity3 }) {
 async function run({ config: configPath, out, readme, token, owner, warn = console.warn }) {
   const config = await loadConfig(configPath);
   const stats = config.activity ? await contributions(config, { token, owner, warn }) : null;
-  const cards = renderCards(config, { stats });
+  const repo = config.featured ? await repository(config, { token, warn }) : null;
+  const cards = renderCards(config, { stats, repo });
   await mkdir(out, { recursive: true });
   await Promise.all(cards.map(({ file, svg }) => writeFile(join(out, file), svg)));
-  const keep = (file) => cards.some((card) => card.file === file) || config.activity && !stats && file.startsWith("activity-");
+  const skipped = (file) => config.activity && !stats && file.startsWith("activity-") || config.featured && !repo && file.startsWith("featured-");
+  const keep = (file) => cards.some((card) => card.file === file) || skipped(file);
   const removed = (await readdir(out)).filter((file) => CARD_FILE.test(file) && !keep(file));
   await Promise.all(removed.map((file) => rm(join(out, file))));
   const folder = relative(dirname(resolve(readme)), resolve(out)) || ".";
-  const markup = snippet(config, folder, { activity: Boolean(stats) });
+  const markup = snippet(config, folder, { activity: Boolean(stats), featured: Boolean(repo) });
   if (process.env.GITHUB_STEP_SUMMARY) {
     const summary = `### Vitrine
 
@@ -22290,6 +22399,13 @@ async function contributions(config, { token, owner, warn }) {
     return null;
   }
   return summarize(await fetchCalendar(login, token));
+}
+async function repository(config, { token, warn }) {
+  if (!token) {
+    warn("Skipping the featured card: it needs a token to read the repository.");
+    return null;
+  }
+  return fetchRepository(config.featured.repo, token);
 }
 
 // src/action.js

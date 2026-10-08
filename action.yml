@@ -16,7 +16,7 @@ inputs:
     description: The README the cards appear in. The markup in the run summary uses image paths relative to it.
     default: README.md
   token:
-    description: Token used to read the contribution calendar for the activity card.
+    description: Token used to read the contribution calendar and the featured repository.
     default: ${{ github.token }}
   commit:
     description: Commit the cards back to the repository when they change.
