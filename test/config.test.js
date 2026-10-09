@@ -51,6 +51,39 @@ test('rejects typos in keys instead of ignoring them', () => {
   assert.throws(() => normalize({ hero: { name: 'Ada', tagine: 'Typo' } }), /unknown key "tagine"/);
 });
 
+test('suggests the key a typo was meant to be', () => {
+  assert.throws(
+    () => normalize({ hero: { name: 'Ada', tagine: 'Typo' } }),
+    /hero has an unknown key "tagine"\..*Did you mean "tagline"\?/,
+  );
+});
+
+test('suggests the option a typo was meant to be', () => {
+  assert.throws(
+    () => normalize({ wallpaper: 'tied', hero: { name: 'Ada' } }),
+    /got string "tied"\. Did you mean "tide"\?/,
+  );
+  assert.throws(
+    () => normalize({ wallpaper: 'Tide', hero: { name: 'Ada' } }),
+    /Did you mean "tide"\?/,
+  );
+});
+
+test('does not guess when nothing is close', () => {
+  assert.throws(
+    () => normalize({ hero: { name: 'Ada', banana: 'Typo' } }),
+    (error) => !error.message.includes('Did you mean'),
+  );
+  assert.throws(
+    () => normalize({ wallpaper: 'neon', hero: { name: 'Ada' } }),
+    (error) => !error.message.includes('Did you mean'),
+  );
+  assert.throws(
+    () => normalize({ wallpaper: 7, hero: { name: 'Ada' } }),
+    (error) => !error.message.includes('Did you mean'),
+  );
+});
+
 test('rejects an unknown wallpaper', () => {
   assert.throws(() => normalize({ wallpaper: 'neon', hero: { name: 'Ada' } }), /wallpaper should be one of tide, dusk, graphite/);
 });
