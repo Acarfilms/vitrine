@@ -105,6 +105,29 @@ test('the activity card speaks the configured language', () => {
   assert.doesNotMatch(card.svg, /Contributions|Last 12 months|avg /);
 });
 
+test('the activity card renders Italian labels and months', () => {
+  const config = normalize({ language: 'it', activity: true });
+  const [card] = renderCards(config, {
+    stats: { ...stats, total: 12_345, currentStreak: 1 },
+  });
+
+  for (const words of [
+    'Attività',
+    'Ultimi 12 mesi',
+    'Contributi',
+    'Giorni attivi',
+    'Serie più lunga',
+    '12.345',
+    'media ',
+    '>Gen<',
+  ]) {
+    assert.ok(card.svg.includes(words), `missing "${words}"`);
+  }
+
+  assert.match(card.svg, />1<tspan[^>]*>giorno</, 'one day is singular');
+  assert.doesNotMatch(card.svg, /Contributions|Last 12 months|avg /);
+});
+
 test('every language has every word', () => {
   const shape = (value) => (typeof value === 'object' && !Array.isArray(value)
     ? Object.fromEntries(Object.entries(value).map(([key, inner]) => [key, shape(inner)]))

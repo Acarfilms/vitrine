@@ -21519,7 +21519,12 @@ function appIcon(slug, theme2, { x, y, size }) {
 var LANGUAGES = {
   en: {
     locale: "en-US",
-    titles: { expertise: "Expertise", featured: "Featured", specs: "Tech specs", activity: "Activity" },
+    titles: {
+      expertise: "Expertise",
+      featured: "Featured",
+      specs: "Tech specs",
+      activity: "Activity"
+    },
     activity: {
       period: "Last 12 months",
       contributions: "Contributions",
@@ -21528,13 +21533,31 @@ var LANGUAGES = {
       longestStreak: "Longest streak",
       day: { one: "day", other: "days" },
       average: (n) => `avg ${n}/wk`,
-      months: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
+      months: [
+        "Jan",
+        "Feb",
+        "Mar",
+        "Apr",
+        "May",
+        "Jun",
+        "Jul",
+        "Aug",
+        "Sep",
+        "Oct",
+        "Nov",
+        "Dec"
+      ],
       alt: "contributions, active days and streaks over the last 12 months"
     }
   },
   es: {
     locale: "es-ES",
-    titles: { expertise: "Especialidades", featured: "Destacado", specs: "Especificaciones t\xE9cnicas", activity: "Actividad" },
+    titles: {
+      expertise: "Especialidades",
+      featured: "Destacado",
+      specs: "Especificaciones t\xE9cnicas",
+      activity: "Actividad"
+    },
     activity: {
       period: "\xDAltimos 12 meses",
       contributions: "Contribuciones",
@@ -21543,13 +21566,31 @@ var LANGUAGES = {
       longestStreak: "Racha m\xE1s larga",
       day: { one: "d\xEDa", other: "d\xEDas" },
       average: (n) => `media ${n}/sem`,
-      months: ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"],
+      months: [
+        "Ene",
+        "Feb",
+        "Mar",
+        "Abr",
+        "May",
+        "Jun",
+        "Jul",
+        "Ago",
+        "Sep",
+        "Oct",
+        "Nov",
+        "Dic"
+      ],
       alt: "contribuciones, d\xEDas activos y rachas de los \xFAltimos 12 meses"
     }
   },
   fr: {
     locale: "fr-FR",
-    titles: { expertise: "Expertise", featured: "\xC0 la une", specs: "Caract\xE9ristiques techniques", activity: "Activit\xE9" },
+    titles: {
+      expertise: "Expertise",
+      featured: "\xC0 la une",
+      specs: "Caract\xE9ristiques techniques",
+      activity: "Activit\xE9"
+    },
     activity: {
       period: "12 derniers mois",
       contributions: "Contributions",
@@ -21558,13 +21599,31 @@ var LANGUAGES = {
       longestStreak: "Plus longue s\xE9rie",
       day: { one: "jour", other: "jours" },
       average: (n) => `moy. ${n}/sem.`,
-      months: ["Janv", "F\xE9vr", "Mars", "Avr", "Mai", "Juin", "Juil", "Ao\xFBt", "Sept", "Oct", "Nov", "D\xE9c"],
+      months: [
+        "Janv",
+        "F\xE9vr",
+        "Mars",
+        "Avr",
+        "Mai",
+        "Juin",
+        "Juil",
+        "Ao\xFBt",
+        "Sept",
+        "Oct",
+        "Nov",
+        "D\xE9c"
+      ],
       alt: "contributions, jours actifs et s\xE9ries des 12 derniers mois"
     }
   },
   de: {
     locale: "de-DE",
-    titles: { expertise: "Kompetenzen", featured: "Im Fokus", specs: "Technische Daten", activity: "Aktivit\xE4t" },
+    titles: {
+      expertise: "Kompetenzen",
+      featured: "Im Fokus",
+      specs: "Technische Daten",
+      activity: "Aktivit\xE4t"
+    },
     activity: {
       period: "Letzte 12 Monate",
       contributions: "Beitr\xE4ge",
@@ -21573,13 +21632,31 @@ var LANGUAGES = {
       longestStreak: "L\xE4ngste Serie",
       day: { one: "Tag", other: "Tage" },
       average: (n) => `\xD8 ${n}/Woche`,
-      months: ["Jan", "Feb", "M\xE4r", "Apr", "Mai", "Jun", "Jul", "Aug", "Sep", "Okt", "Nov", "Dez"],
+      months: [
+        "Jan",
+        "Feb",
+        "M\xE4r",
+        "Apr",
+        "Mai",
+        "Jun",
+        "Jul",
+        "Aug",
+        "Sep",
+        "Okt",
+        "Nov",
+        "Dez"
+      ],
       alt: "Beitr\xE4ge, aktive Tage und Serien der letzten 12 Monate"
     }
   },
   pt: {
     locale: "pt-BR",
-    titles: { expertise: "Especialidades", featured: "Em destaque", specs: "Especifica\xE7\xF5es t\xE9cnicas", activity: "Atividade" },
+    titles: {
+      expertise: "Especialidades",
+      featured: "Em destaque",
+      specs: "Especifica\xE7\xF5es t\xE9cnicas",
+      activity: "Atividade"
+    },
     activity: {
       period: "\xDAltimos 12 meses",
       contributions: "Contribui\xE7\xF5es",
@@ -21588,8 +21665,54 @@ var LANGUAGES = {
       longestStreak: "Maior sequ\xEAncia",
       day: { one: "dia", other: "dias" },
       average: (n) => `m\xE9dia ${n}/sem`,
-      months: ["Jan", "Fev", "Mar", "Abr", "Mai", "Jun", "Jul", "Ago", "Set", "Out", "Nov", "Dez"],
+      months: [
+        "Jan",
+        "Fev",
+        "Mar",
+        "Abr",
+        "Mai",
+        "Jun",
+        "Jul",
+        "Ago",
+        "Set",
+        "Out",
+        "Nov",
+        "Dez"
+      ],
       alt: "contribui\xE7\xF5es, dias ativos e sequ\xEAncias dos \xFAltimos 12 meses"
+    }
+  },
+  it: {
+    locale: "it-IT",
+    titles: {
+      expertise: "Competenze",
+      featured: "In evidenza",
+      specs: "Specifiche tecniche",
+      activity: "Attivit\xE0"
+    },
+    activity: {
+      period: "Ultimi 12 mesi",
+      contributions: "Contributi",
+      activeDays: "Giorni attivi",
+      currentStreak: "Serie attuale",
+      longestStreak: "Serie pi\xF9 lunga",
+      day: { one: "giorno", other: "giorni" },
+      average: (n) => `media ${n}/sett.`,
+      months: [
+        "Gen",
+        "Feb",
+        "Mar",
+        "Apr",
+        "Mag",
+        "Giu",
+        "Lug",
+        "Ago",
+        "Set",
+        "Ott",
+        "Nov",
+        "Dic"
+      ],
+      alt: "contributi, giorni attivi e serie degli ultimi 12 mesi"
     }
   }
 };
