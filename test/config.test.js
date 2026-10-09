@@ -119,7 +119,7 @@ test('a custom title wins over the translated one', () => {
 });
 
 test('rejects an unknown language', () => {
-  assert.throws(() => normalize({ language: 'klingon', activity: true }), /language should be one of en, es, fr, de, pt/);
+  assert.throws(() => normalize({ language: 'klingon', activity: true }), /language should be one of en, es, fr, de, pt, it/);
 });
 
 test('featured takes a repository, written short or long', () => {
