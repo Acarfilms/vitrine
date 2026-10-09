@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased
+
+- A `camera` symbol for hero widgets and link buttons.
+
 ## 1.2.0 (2026-10-08)
 
 - A featured card shows one of your repositories the way GitHub lists it: name, description, main language, stars and forks. It links to the repository from the README.
