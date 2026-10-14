@@ -21349,7 +21349,8 @@ var SYMBOLS = {
   calendar: (c2) => stroke(c2, '<rect x="3.5" y="5" width="17" height="15" rx="3"/><path d="M3.5 9.8h17M8 3v4M16 3v4"/>'),
   appearance: (c2) => `${stroke(c2, '<circle cx="12" cy="12" r="8.5"/>')}<path d="M12 3.5a8.5 8.5 0 0 1 0 17z" fill="${c2}"/>`,
   book: (c2) => stroke(c2, '<path d="M12 6.6C10.2 5.2 7.4 4.6 4 4.8v13.1c3.4-.2 6.2.4 8 1.8 1.8-1.4 4.6-2 8-1.8V4.8c-3.4-.2-6.2.4-8 1.8zM12 6.6v13.1"/>'),
-  mail: (c2) => stroke(c2, '<rect x="3.5" y="5.5" width="17" height="13" rx="2.5"/><path d="m4.5 7 7.5 5.5L19.5 7"/>')
+  mail: (c2) => stroke(c2, '<rect x="3.5" y="5.5" width="17" height="13" rx="2.5"/><path d="m4.5 7 7.5 5.5L19.5 7"/>'),
+  camera: (c2) => stroke(c2, '<path d="M3.5 9.2c0-1.5 1.2-2.7 2.7-2.7h1.4c.6 0 1.1-.3 1.4-.8l.6-1c.3-.5.8-.8 1.4-.8h2c.6 0 1.1.3 1.4.8l.6 1c.3.5.8.8 1.4.8h1.4c1.5 0 2.7 1.2 2.7 2.7v7.6c0 1.5-1.2 2.7-2.7 2.7H6.2c-1.5 0-2.7-1.2-2.7-2.7z"/><circle cx="12" cy="13" r="3.6"/>')
 };
 function stroke(color, shapes) {
   return `<g stroke="${color}" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">${shapes}</g>`;
