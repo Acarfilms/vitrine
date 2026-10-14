@@ -21873,6 +21873,32 @@ function links(raw, check) {
 function slugify(value) {
   return value.normalize("NFKD").replace(/[\u0300-\u036f]/g, "").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
 }
+function didYouMean(value, options) {
+  if (typeof value !== "string" || !value) return "";
+  const wanted = value.toLowerCase();
+  let best = null;
+  let bestDistance = Infinity;
+  for (const option of options) {
+    const distance = editDistance(wanted, option.toLowerCase());
+    if (distance < bestDistance) [best, bestDistance] = [option, distance];
+  }
+  const allowed = Math.max(1, Math.floor(best.length / 3));
+  return bestDistance <= allowed ? ` Did you mean "${best}"?` : "";
+}
+function editDistance(a2, b) {
+  const rows = Array.from({ length: a2.length + 1 }, (_, i) => [i]);
+  for (let j = 1; j <= b.length; j++) rows[0][j] = j;
+  for (let i = 1; i <= a2.length; i++) {
+    for (let j = 1; j <= b.length; j++) {
+      const same = a2[i - 1] === b[j - 1] ? 0 : 1;
+      rows[i][j] = Math.min(rows[i - 1][j] + 1, rows[i][j - 1] + 1, rows[i - 1][j - 1] + same);
+      if (i > 1 && j > 1 && a2[i - 1] === b[j - 2] && a2[i - 2] === b[j - 1]) {
+        rows[i][j] = Math.min(rows[i][j], rows[i - 2][j - 2] + 1);
+      }
+    }
+  }
+  return rows[a2.length][b.length];
+}
 function checker(file) {
   const fail = (at, message) => {
     throw new ConfigError(`${file}: ${at} ${message}`);
@@ -21885,7 +21911,7 @@ function checker(file) {
     },
     keys(value, allowed, at) {
       const unknown = Object.keys(value).find((key) => !allowed.includes(key));
-      if (unknown) fail(at, `has an unknown key "${unknown}". Expected one of: ${allowed.join(", ")}.`);
+      if (unknown) fail(at, `has an unknown key "${unknown}". Expected one of: ${allowed.join(", ")}.${didYouMean(unknown, allowed)}`);
     },
     // YAML reads `value: 2019` as a number; treat it as the text it was meant to be.
     string(value, at) {
@@ -21901,7 +21927,7 @@ function checker(file) {
       return value;
     },
     oneOf(value, options, at) {
-      if (!options.includes(value)) fail(at, `should be one of ${options.join(", ")}, got ${describe2(value)}.`);
+      if (!options.includes(value)) fail(at, `should be one of ${options.join(", ")}, got ${describe2(value)}.${didYouMean(value, options)}`);
       return value;
     },
     list(value, at, { min = 0, max = Infinity } = {}) {
