@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- A mistyped key or option now suggests the closest valid one, for example `Did you mean "tagline"?`.
 - A `camera` symbol for hero widgets and link buttons.
 
 ## 1.2.0 (2026-10-08)
