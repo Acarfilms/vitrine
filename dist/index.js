@@ -21592,6 +21592,21 @@ var LANGUAGES = {
       months: ["Jan", "Fev", "Mar", "Abr", "Mai", "Jun", "Jul", "Ago", "Set", "Out", "Nov", "Dez"],
       alt: "contribui\xE7\xF5es, dias ativos e sequ\xEAncias dos \xFAltimos 12 meses"
     }
+  },
+  it: {
+    locale: "it-IT",
+    titles: { expertise: "Competenze", featured: "In evidenza", specs: "Specifiche tecniche", activity: "Attivit\xE0" },
+    activity: {
+      period: "Ultimi 12 mesi",
+      contributions: "Contributi",
+      activeDays: "Giorni attivi",
+      currentStreak: "Serie attuale",
+      longestStreak: "Serie pi\xF9 lunga",
+      day: { one: "giorno", other: "giorni" },
+      average: (n) => `media ${n}/sett.`,
+      months: ["Gen", "Feb", "Mar", "Apr", "Mag", "Giu", "Lug", "Ago", "Set", "Ott", "Nov", "Dic"],
+      alt: "contributi, giorni attivi e serie degli ultimi 12 mesi"
+    }
   }
 };
 function formatNumber(n, language) {

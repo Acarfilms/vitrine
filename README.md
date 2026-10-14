@@ -100,7 +100,7 @@ Every section is optional, but the file needs at least one.
 | --- | --- | --- |
 | `wallpaper` | `tide` | Background of the hero and the link buttons: `tide`, `dusk` or `graphite`. |
 | `accent` | `blue` | Color of the eyebrows and the activity chart: `blue`, `indigo`, `purple`, `pink`, `orange`, `green`, `teal`, `red`, `yellow` or `mint`. |
-| `language` | `en` | Language of the text Vitrine writes itself, such as the activity card and the default titles: `en`, `es`, `fr`, `de` or `pt`. Your own text is used as written. |
+| `language` | `en` | Language of the text Vitrine writes itself, such as the activity card and the default titles: `en`, `es`, `fr`, `de`, `pt` or `it`. Your own text is used as written. |
 | `login` | Repository owner | Whose contribution calendar to read. Only needed when running Vitrine outside GitHub Actions. |
 
 ### Hero
