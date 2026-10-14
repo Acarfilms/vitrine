@@ -21349,7 +21349,8 @@ var SYMBOLS = {
   calendar: (c2) => stroke(c2, '<rect x="3.5" y="5" width="17" height="15" rx="3"/><path d="M3.5 9.8h17M8 3v4M16 3v4"/>'),
   appearance: (c2) => `${stroke(c2, '<circle cx="12" cy="12" r="8.5"/>')}<path d="M12 3.5a8.5 8.5 0 0 1 0 17z" fill="${c2}"/>`,
   book: (c2) => stroke(c2, '<path d="M12 6.6C10.2 5.2 7.4 4.6 4 4.8v13.1c3.4-.2 6.2.4 8 1.8 1.8-1.4 4.6-2 8-1.8V4.8c-3.4-.2-6.2.4-8 1.8zM12 6.6v13.1"/>'),
-  mail: (c2) => stroke(c2, '<rect x="3.5" y="5.5" width="17" height="13" rx="2.5"/><path d="m4.5 7 7.5 5.5L19.5 7"/>')
+  mail: (c2) => stroke(c2, '<rect x="3.5" y="5.5" width="17" height="13" rx="2.5"/><path d="m4.5 7 7.5 5.5L19.5 7"/>'),
+  camera: (c2) => stroke(c2, '<path d="M3.5 9.2c0-1.5 1.2-2.7 2.7-2.7h1.4c.6 0 1.1-.3 1.4-.8l.6-1c.3-.5.8-.8 1.4-.8h2c.6 0 1.1.3 1.4.8l.6 1c.3.5.8.8 1.4.8h1.4c1.5 0 2.7 1.2 2.7 2.7v7.6c0 1.5-1.2 2.7-2.7 2.7H6.2c-1.5 0-2.7-1.2-2.7-2.7z"/><circle cx="12" cy="13" r="3.6"/>')
 };
 function stroke(color, shapes) {
   return `<g stroke="${color}" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">${shapes}</g>`;
@@ -21590,6 +21591,21 @@ var LANGUAGES = {
       average: (n) => `m\xE9dia ${n}/sem`,
       months: ["Jan", "Fev", "Mar", "Abr", "Mai", "Jun", "Jul", "Ago", "Set", "Out", "Nov", "Dez"],
       alt: "contribui\xE7\xF5es, dias ativos e sequ\xEAncias dos \xFAltimos 12 meses"
+    }
+  },
+  it: {
+    locale: "it-IT",
+    titles: { expertise: "Competenze", featured: "In evidenza", specs: "Specifiche tecniche", activity: "Attivit\xE0" },
+    activity: {
+      period: "Ultimi 12 mesi",
+      contributions: "Contributi",
+      activeDays: "Giorni attivi",
+      currentStreak: "Serie attuale",
+      longestStreak: "Serie pi\xF9 lunga",
+      day: { one: "giorno", other: "giorni" },
+      average: (n) => `media ${n}/sett.`,
+      months: ["Gen", "Feb", "Mar", "Apr", "Mag", "Giu", "Lug", "Ago", "Set", "Ott", "Nov", "Dic"],
+      alt: "contributi, giorni attivi e serie degli ultimi 12 mesi"
     }
   }
 };
@@ -21873,6 +21889,32 @@ function links(raw, check) {
 function slugify(value) {
   return value.normalize("NFKD").replace(/[\u0300-\u036f]/g, "").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
 }
+function didYouMean(value, options) {
+  if (typeof value !== "string" || !value) return "";
+  const wanted = value.toLowerCase();
+  let best = null;
+  let bestDistance = Infinity;
+  for (const option of options) {
+    const distance = editDistance(wanted, option.toLowerCase());
+    if (distance < bestDistance) [best, bestDistance] = [option, distance];
+  }
+  const allowed = Math.max(1, Math.floor(best.length / 3));
+  return bestDistance <= allowed ? ` Did you mean "${best}"?` : "";
+}
+function editDistance(a2, b) {
+  const rows = Array.from({ length: a2.length + 1 }, (_, i) => [i]);
+  for (let j = 1; j <= b.length; j++) rows[0][j] = j;
+  for (let i = 1; i <= a2.length; i++) {
+    for (let j = 1; j <= b.length; j++) {
+      const same = a2[i - 1] === b[j - 1] ? 0 : 1;
+      rows[i][j] = Math.min(rows[i - 1][j] + 1, rows[i][j - 1] + 1, rows[i - 1][j - 1] + same);
+      if (i > 1 && j > 1 && a2[i - 1] === b[j - 2] && a2[i - 2] === b[j - 1]) {
+        rows[i][j] = Math.min(rows[i][j], rows[i - 2][j - 2] + 1);
+      }
+    }
+  }
+  return rows[a2.length][b.length];
+}
 function checker(file) {
   const fail = (at, message) => {
     throw new ConfigError(`${file}: ${at} ${message}`);
@@ -21885,7 +21927,7 @@ function checker(file) {
     },
     keys(value, allowed, at) {
       const unknown = Object.keys(value).find((key) => !allowed.includes(key));
-      if (unknown) fail(at, `has an unknown key "${unknown}". Expected one of: ${allowed.join(", ")}.`);
+      if (unknown) fail(at, `has an unknown key "${unknown}". Expected one of: ${allowed.join(", ")}.${didYouMean(unknown, allowed)}`);
     },
     // YAML reads `value: 2019` as a number; treat it as the text it was meant to be.
     string(value, at) {
@@ -21901,7 +21943,7 @@ function checker(file) {
       return value;
     },
     oneOf(value, options, at) {
-      if (!options.includes(value)) fail(at, `should be one of ${options.join(", ")}, got ${describe2(value)}.`);
+      if (!options.includes(value)) fail(at, `should be one of ${options.join(", ")}, got ${describe2(value)}.${didYouMean(value, options)}`);
       return value;
     },
     list(value, at, { min = 0, max = Infinity } = {}) {
