@@ -1,8 +1,13 @@
 # Changelog
 
+## Unreleased
+
+- An interactive web playground on GitHub Pages to design, tweak and preview cards live in the browser.
+
 ## 1.4.0 (2026-10-19)
 
 - Three more wallpapers: `aurora`, `ember` and `nebula`.
+
 
 ## 1.3.0 (2026-10-14)
 

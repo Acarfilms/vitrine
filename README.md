@@ -2,7 +2,7 @@
 
 Vitrine turns one YAML file into the cards on your GitHub profile: a glass hero with your name, a bento of what you do, a featured repository, a tech specs table, a year of activity and a button for each of your links. A GitHub Action renders them as SVG files in your own repository, so nothing depends on a hosted card service.
 
-The expertise, featured, specs and activity cards come in light and dark versions and follow GitHub's theme. The hero and the link buttons carry their own wallpaper and look the same in both.
+The expertise, featured, specs and activity cards come in light and dark versions and follow GitHub's theme. The hero and the link buttons carry their own wallpaper and look the same in both. Try them live in the [web playground](https://acarfilms.github.io/vitrine/).
 
 ## What it looks like
 
