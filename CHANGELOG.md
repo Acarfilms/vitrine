@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased
+
+- An interactive web playground on GitHub Pages to design, tweak and preview cards live in the browser.
+
 ## 1.3.0 (2026-10-14)
 
 - A mistyped key or option now suggests the closest valid one, for example `Did you mean "tagline"?`.
