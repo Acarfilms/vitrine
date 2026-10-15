@@ -76,6 +76,21 @@ export const LANGUAGES = {
       alt: 'contribuições, dias ativos e sequências dos últimos 12 meses',
     },
   },
+  it: {
+    locale: 'it-IT',
+    titles: { expertise: 'Competenze', featured: 'In evidenza', specs: 'Specifiche tecniche', activity: 'Attività' },
+    activity: {
+      period: 'Ultimi 12 mesi',
+      contributions: 'Contributi',
+      activeDays: 'Giorni attivi',
+      currentStreak: 'Serie attuale',
+      longestStreak: 'Serie più lunga',
+      day: { one: 'giorno', other: 'giorni' },
+      average: (n) => `media ${n}/sett.`,
+      months: ['Gen', 'Feb', 'Mar', 'Apr', 'Mag', 'Giu', 'Lug', 'Ago', 'Set', 'Ott', 'Nov', 'Dic'],
+      alt: 'contributi, giorni attivi e serie degli ultimi 12 mesi',
+    },
+  },
 };
 
 // French groups thousands with a narrow no-break space, which the embedded font subset

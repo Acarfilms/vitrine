@@ -4,6 +4,13 @@
 
 - Three more wallpapers: `aurora`, `ember` and `nebula`.
 
+## 1.3.0 (2026-10-14)
+
+- A mistyped key or option now suggests the closest valid one, for example `Did you mean "tagline"?`.
+- A `camera` symbol for hero widgets and link buttons.
+- Italian for the `language` option.
+- Simple Icons 16.35.0, with the brands added since 16.33.
+
 ## 1.2.0 (2026-10-08)
 
 - A featured card shows one of your repositories the way GitHub lists it: name, description, main language, stars and forks. It links to the repository from the README.
