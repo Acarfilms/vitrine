@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 1.4.0 (2026-10-19)
 
 - Three more wallpapers: `aurora`, `ember` and `nebula`.
 

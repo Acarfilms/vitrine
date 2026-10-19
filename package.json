@@ -1,6 +1,6 @@
 {
   "name": "vitrine",
-  "version": "1.3.0",
+  "version": "1.4.0",
   "private": true,
   "description": "Liquid Glass cards for your GitHub profile README, rendered by a GitHub Action.",
   "license": "MIT",
