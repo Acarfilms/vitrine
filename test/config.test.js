@@ -85,7 +85,7 @@ test('does not guess when nothing is close', () => {
 });
 
 test('rejects an unknown wallpaper', () => {
-  assert.throws(() => normalize({ wallpaper: 'neon', hero: { name: 'Ada' } }), /wallpaper should be one of tide, dusk, graphite/);
+  assert.throws(() => normalize({ wallpaper: 'neon', hero: { name: 'Ada' } }), /wallpaper should be one of tide, dusk, graphite, aurora, ember, nebula/);
 });
 
 test('limits the hero to three widgets', () => {

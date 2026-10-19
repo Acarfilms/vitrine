@@ -98,7 +98,7 @@ Every section is optional, but the file needs at least one.
 
 | Key | Default | |
 | --- | --- | --- |
-| `wallpaper` | `tide` | Background of the hero and the link buttons: `tide`, `dusk` or `graphite`. |
+| `wallpaper` | `tide` | Background of the hero and the link buttons: `tide`, `dusk`, `graphite`, `aurora`, `ember` or `nebula`. |
 | `accent` | `blue` | Color of the eyebrows and the activity chart: `blue`, `indigo`, `purple`, `pink`, `orange`, `green`, `teal`, `red`, `yellow` or `mint`. |
 | `language` | `en` | Language of the text Vitrine writes itself, such as the activity card and the default titles: `en`, `es`, `fr`, `de`, `pt` or `it`. Your own text is used as written. |
 | `login` | Repository owner | Whose contribution calendar to read. Only needed when running Vitrine outside GitHub Actions. |
@@ -188,6 +188,9 @@ Each link becomes a separate glass button, so each one is clickable in the READM
   <img src="docs/wallpapers/tide.svg" width="32%" alt="tide">
   <img src="docs/wallpapers/dusk.svg" width="32%" alt="dusk">
   <img src="docs/wallpapers/graphite.svg" width="32%" alt="graphite">
+  <img src="docs/wallpapers/aurora.svg" width="32%" alt="aurora">
+  <img src="docs/wallpapers/ember.svg" width="32%" alt="ember">
+  <img src="docs/wallpapers/nebula.svg" width="32%" alt="nebula">
 </p>
 
 ## Icons

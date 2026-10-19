@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased
+
+- Three more wallpapers: `aurora`, `ember` and `nebula`.
+
 ## 1.3.0 (2026-10-14)
 
 - A mistyped key or option now suggests the closest valid one, for example `Did you mean "tagline"?`.
