@@ -19,7 +19,7 @@ export function generateSampleStats() {
     const d = new Date(now);
     d.setDate(d.getDate() - i * 7);
     const wave = Math.sin((51 - i) * 0.25) * 12 + 18;
-    const spike = (i % 7 === 0 || i % 11 === 0) ? Math.floor(Math.random() * 20) + 15 : 0;
+    const spike = (i % 7 === 0) ? 28 : (i % 11 === 0) ? 20 : 0;
     const count = Math.max(0, Math.floor(wave + spike));
     total += count;
     weeks.push({
