@@ -21539,6 +21539,10 @@ var LANGUAGES = {
       activeDays: "Active days",
       currentStreak: "Current streak",
       longestStreak: "Longest streak",
+      commits: "Commits",
+      releases: "Releases",
+      contributors: "Contributors",
+      mergedPRs: "Merged PRs",
       day: { one: "day", other: "days" },
       average: (n) => `avg ${n}/wk`,
       months: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
@@ -21554,6 +21558,10 @@ var LANGUAGES = {
       activeDays: "D\xEDas activos",
       currentStreak: "Racha actual",
       longestStreak: "Racha m\xE1s larga",
+      commits: "Commits",
+      releases: "Lanzamientos",
+      contributors: "Colaboradores",
+      mergedPRs: "PRs fusionados",
       day: { one: "d\xEDa", other: "d\xEDas" },
       average: (n) => `media ${n}/sem`,
       months: ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"],
@@ -21569,6 +21577,10 @@ var LANGUAGES = {
       activeDays: "Jours actifs",
       currentStreak: "S\xE9rie actuelle",
       longestStreak: "Plus longue s\xE9rie",
+      commits: "Commits",
+      releases: "Publications",
+      contributors: "Contributeurs",
+      mergedPRs: "PR fusionn\xE9es",
       day: { one: "jour", other: "jours" },
       average: (n) => `moy. ${n}/sem.`,
       months: ["Janv", "F\xE9vr", "Mars", "Avr", "Mai", "Juin", "Juil", "Ao\xFBt", "Sept", "Oct", "Nov", "D\xE9c"],
@@ -21584,6 +21596,10 @@ var LANGUAGES = {
       activeDays: "Aktive Tage",
       currentStreak: "Aktuelle Serie",
       longestStreak: "L\xE4ngste Serie",
+      commits: "Commits",
+      releases: "Releases",
+      contributors: "Mitwirkende",
+      mergedPRs: "Gemergete PRs",
       day: { one: "Tag", other: "Tage" },
       average: (n) => `\xD8 ${n}/Woche`,
       months: ["Jan", "Feb", "M\xE4r", "Apr", "Mai", "Jun", "Jul", "Aug", "Sep", "Okt", "Nov", "Dez"],
@@ -21599,6 +21615,10 @@ var LANGUAGES = {
       activeDays: "Dias ativos",
       currentStreak: "Sequ\xEAncia atual",
       longestStreak: "Maior sequ\xEAncia",
+      commits: "Commits",
+      releases: "Lan\xE7amentos",
+      contributors: "Colaboradores",
+      mergedPRs: "PRs mesclados",
       day: { one: "dia", other: "dias" },
       average: (n) => `m\xE9dia ${n}/sem`,
       months: ["Jan", "Fev", "Mar", "Abr", "Mai", "Jun", "Jul", "Ago", "Set", "Out", "Nov", "Dez"],
@@ -21614,6 +21634,10 @@ var LANGUAGES = {
       activeDays: "Giorni attivi",
       currentStreak: "Serie attuale",
       longestStreak: "Serie pi\xF9 lunga",
+      commits: "Commit",
+      releases: "Rilasci",
+      contributors: "Collaboratori",
+      mergedPRs: "PR unite",
       day: { one: "giorno", other: "giorni" },
       average: (n) => `media ${n}/sett.`,
       months: ["Gen", "Feb", "Mar", "Apr", "Mag", "Giu", "Lug", "Ago", "Set", "Ott", "Nov", "Dic"],
@@ -22018,12 +22042,39 @@ import { appendFile, mkdir, readdir, rm, writeFile } from "node:fs/promises";
 import { dirname, join, relative, resolve } from "node:path";
 
 // src/github.js
-var CALENDAR = `query ($login: String!) {
-  user(login: $login) {
-    contributionsCollection {
-      contributionCalendar {
-        totalContributions
-        weeks { contributionDays { date contributionCount } }
+var ACTIVITY = `query ($login: String!, $since: GitTimestamp) {
+  repositoryOwner(login: $login) {
+    __typename
+    ... on User {
+      contributionsCollection {
+        contributionCalendar {
+          totalContributions
+          weeks { contributionDays { date contributionCount } }
+        }
+      }
+    }
+    ... on Organization {
+      membersWithRole {
+        totalCount
+      }
+      repositories(first: 20, isFork: false, privacy: PUBLIC, orderBy: {field: PUSHED_AT, direction: DESC}) {
+        nodes {
+          defaultBranchRef {
+            target {
+              ... on Commit {
+                history(since: $since) {
+                  totalCount
+                }
+              }
+            }
+          }
+          releases {
+            totalCount
+          }
+          pullRequests(states: MERGED) {
+            totalCount
+          }
+        }
       }
     }
   }
@@ -22053,15 +22104,32 @@ async function graphql(query, variables, token) {
   const reason = payload.errors?.map((error) => error.message).join("; ") ?? `HTTP ${response.status}`;
   return { ok: response.ok, data: payload.data, notFound, reason };
 }
-async function fetchCalendar(login, token) {
-  const { ok, data, notFound, reason } = await graphql(CALENDAR, { login }, token);
-  if (notFound) {
-    throw new Error(`"${login}" is not a personal GitHub account. The activity card only works for people, not organizations.`);
+async function fetchActivity(login, token) {
+  const since = new Date(Date.now() - 365 * 864e5).toISOString();
+  const { ok, data, notFound, reason } = await graphql(ACTIVITY, { login, since }, token);
+  const owner = data?.repositoryOwner;
+  if (notFound || ok && !owner) {
+    throw new Error(`Could not find the account "${login}". Check that the user or organization exists.`);
   }
-  const calendar = data?.user?.contributionsCollection?.contributionCalendar;
-  if (!ok || !calendar) throw new Error(`Could not read the contribution calendar for "${login}": ${reason}`);
-  return calendar;
+  if (!ok || !owner) throw new Error(`Could not read activity for "${login}": ${reason}`);
+  if (owner.__typename === "Organization") {
+    const repos = owner.repositories?.nodes ?? [];
+    return {
+      type: "organization",
+      commits: repos.reduce((sum, r) => sum + (r.defaultBranchRef?.target?.history?.totalCount ?? 0), 0),
+      releases: repos.reduce((sum, r) => sum + (r.releases?.totalCount ?? 0), 0),
+      contributors: owner.membersWithRole?.totalCount ?? 0,
+      mergedPRs: repos.reduce((sum, r) => sum + (r.pullRequests?.totalCount ?? 0), 0)
+    };
+  }
+  const calendar = owner.contributionsCollection?.contributionCalendar;
+  if (!calendar) throw new Error(`Could not read the contribution calendar for "${login}": ${reason}`);
+  return {
+    type: "user",
+    ...calendar
+  };
 }
+var fetchCalendar = fetchActivity;
 async function fetchRepository(fullName, token) {
   const [owner, name] = fullName.split("/");
   const { ok, data, notFound, reason } = await graphql(REPOSITORY, { owner, name }, token);
@@ -22081,7 +22149,11 @@ async function fetchRepository(fullName, token) {
     language: repository2.primaryLanguage
   };
 }
-function summarize(calendar) {
+function summarize(activity3) {
+  if (activity3.type === "organization") {
+    return activity3;
+  }
+  const calendar = activity3;
   const days2 = calendar.weeks.flatMap((week) => week.contributionDays);
   let longestStreak = 0;
   let run2 = 0;
@@ -22094,6 +22166,7 @@ function summarize(calendar) {
   if (days2[i]?.contributionCount === 0) i -= 1;
   for (; i >= 0 && days2[i].contributionCount > 0; i -= 1) currentStreak += 1;
   return {
+    type: "user",
     total: calendar.totalContributions,
     activeDays: days2.filter((day) => day.contributionCount > 0).length,
     currentStreak,
@@ -22111,17 +22184,27 @@ var HEIGHT = 280;
 function activity2({ title }, stats, theme2, language = "en") {
   const span = CARD_WIDTH - INSET * 2;
   const words = LANGUAGES[language].activity;
-  return section(theme2, { title, aside: words.period }, HEIGHT, [
-    surface(theme2, { y: CONTENT_TOP, height: HEIGHT }),
+  const isOrg = stats.type === "organization";
+  const height = isOrg ? 148 : HEIGHT;
+  const body = [
+    surface(theme2, { y: CONTENT_TOP, height }),
     figures(stats, theme2, span, language),
-    `<path d="M${INSET} ${CONTENT_TOP + 128.5}H${CARD_WIDTH - INSET}" stroke="${theme2.separator}"/>`,
-    chart(stats, theme2, span, words)
-  ].join("\n"));
+    ...!isOrg ? [
+      `<path d="M${INSET} ${CONTENT_TOP + 128.5}H${CARD_WIDTH - INSET}" stroke="${theme2.separator}"/>`,
+      chart(stats, theme2, span, words)
+    ] : []
+  ];
+  return section(theme2, { title, aside: words.period }, height, body.join("\n"));
 }
 function figures(stats, theme2, span, language) {
   const words = LANGUAGES[language].activity;
   const format = (n) => formatNumber(n, language);
-  const items = [
+  const items = stats.type === "organization" ? [
+    [words.commits, format(stats.commits)],
+    [words.releases, format(stats.releases)],
+    [words.contributors, format(stats.contributors)],
+    [words.mergedPRs, format(stats.mergedPRs)]
+  ] : [
     [words.contributions, format(stats.total)],
     [words.activeDays, format(stats.activeDays)],
     [words.currentStreak, format(stats.currentStreak), days(stats.currentStreak, language)],

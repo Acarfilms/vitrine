@@ -128,6 +128,23 @@ test('the activity card renders Italian labels and months', () => {
   assert.doesNotMatch(card.svg, /Contributions|Last 12 months|avg /);
 });
 
+test('the activity card renders organization metrics', () => {
+  const config = normalize({ language: 'en', activity: true });
+  const orgStats = {
+    type: 'organization',
+    commits: 1200,
+    releases: 15,
+    contributors: 42,
+    mergedPRs: 88,
+  };
+  const [card] = renderCards(config, { stats: orgStats });
+
+  for (const word of ['Commits', 'Releases', 'Contributors', 'Merged PRs', '1,200', '15', '42', '88']) {
+    assert.ok(card.svg.includes(word), `missing "${word}"`);
+  }
+  assert.doesNotMatch(card.svg, /Contributions|Active days|streak/i);
+});
+
 test('every language has every word', () => {
   const shape = (value) => (typeof value === 'object' && !Array.isArray(value)
     ? Object.fromEntries(Object.entries(value).map(([key, inner]) => [key, shape(inner)]))
