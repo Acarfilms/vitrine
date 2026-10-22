@@ -21541,7 +21541,7 @@ var LANGUAGES = {
       longestStreak: "Longest streak",
       commits: "Commits",
       releases: "Releases",
-      contributors: "Contributors",
+      members: "Members",
       mergedPRs: "Merged PRs",
       day: { one: "day", other: "days" },
       average: (n) => `avg ${n}/wk`,
@@ -21560,7 +21560,7 @@ var LANGUAGES = {
       longestStreak: "Racha m\xE1s larga",
       commits: "Commits",
       releases: "Lanzamientos",
-      contributors: "Colaboradores",
+      members: "Miembros",
       mergedPRs: "PRs fusionados",
       day: { one: "d\xEDa", other: "d\xEDas" },
       average: (n) => `media ${n}/sem`,
@@ -21579,7 +21579,7 @@ var LANGUAGES = {
       longestStreak: "Plus longue s\xE9rie",
       commits: "Commits",
       releases: "Publications",
-      contributors: "Contributeurs",
+      members: "Membres",
       mergedPRs: "PR fusionn\xE9es",
       day: { one: "jour", other: "jours" },
       average: (n) => `moy. ${n}/sem.`,
@@ -21598,7 +21598,7 @@ var LANGUAGES = {
       longestStreak: "L\xE4ngste Serie",
       commits: "Commits",
       releases: "Releases",
-      contributors: "Mitwirkende",
+      members: "Mitglieder",
       mergedPRs: "Gemergete PRs",
       day: { one: "Tag", other: "Tage" },
       average: (n) => `\xD8 ${n}/Woche`,
@@ -21617,7 +21617,7 @@ var LANGUAGES = {
       longestStreak: "Maior sequ\xEAncia",
       commits: "Commits",
       releases: "Lan\xE7amentos",
-      contributors: "Colaboradores",
+      members: "Membros",
       mergedPRs: "PRs mesclados",
       day: { one: "dia", other: "dias" },
       average: (n) => `m\xE9dia ${n}/sem`,
@@ -21636,7 +21636,7 @@ var LANGUAGES = {
       longestStreak: "Serie pi\xF9 lunga",
       commits: "Commit",
       releases: "Rilasci",
-      contributors: "Collaboratori",
+      members: "Membri",
       mergedPRs: "PR unite",
       day: { one: "giorno", other: "giorni" },
       average: (n) => `media ${n}/sett.`,
@@ -22042,7 +22042,7 @@ import { appendFile, mkdir, readdir, rm, writeFile } from "node:fs/promises";
 import { dirname, join, relative, resolve } from "node:path";
 
 // src/github.js
-var ACTIVITY = `query ($login: String!, $since: GitTimestamp) {
+var ACTIVITY = `query ($login: String!, $since: GitTimestamp!, $prQuery: String!) {
   repositoryOwner(login: $login) {
     __typename
     ... on User {
@@ -22068,15 +22068,17 @@ var ACTIVITY = `query ($login: String!, $since: GitTimestamp) {
               }
             }
           }
-          releases {
-            totalCount
-          }
-          pullRequests(states: MERGED) {
-            totalCount
+          releases(first: 100, orderBy: {field: CREATED_AT, direction: DESC}) {
+            nodes {
+              publishedAt
+            }
           }
         }
       }
     }
+  }
+  search(query: $prQuery, type: ISSUE) {
+    issueCount
   }
 }`;
 var REPOSITORY = `query ($owner: String!, $name: String!) {
@@ -22105,8 +22107,10 @@ async function graphql(query, variables, token) {
   return { ok: response.ok, data: payload.data, notFound, reason };
 }
 async function fetchActivity(login, token) {
-  const since = new Date(Date.now() - 365 * 864e5).toISOString();
-  const { ok, data, notFound, reason } = await graphql(ACTIVITY, { login, since }, token);
+  const date = new Date(Date.now() - 365 * 864e5).toISOString().slice(0, 10);
+  const since = `${date}T00:00:00Z`;
+  const prQuery = `org:${login} is:pr is:merged merged:>=${date}`;
+  const { ok, data, notFound, reason } = await graphql(ACTIVITY, { login, since, prQuery }, token);
   const owner = data?.repositoryOwner;
   if (notFound || ok && !owner) {
     throw new Error(`Could not find the account "${login}". Check that the user or organization exists.`);
@@ -22117,9 +22121,9 @@ async function fetchActivity(login, token) {
     return {
       type: "organization",
       commits: repos.reduce((sum, r) => sum + (r.defaultBranchRef?.target?.history?.totalCount ?? 0), 0),
-      releases: repos.reduce((sum, r) => sum + (r.releases?.totalCount ?? 0), 0),
-      contributors: owner.membersWithRole?.totalCount ?? 0,
-      mergedPRs: repos.reduce((sum, r) => sum + (r.pullRequests?.totalCount ?? 0), 0)
+      releases: repos.reduce((sum, r) => sum + (r.releases?.nodes?.filter((n) => n.publishedAt && new Date(n.publishedAt) >= new Date(since)).length ?? 0), 0),
+      members: owner.membersWithRole?.totalCount ?? 0,
+      mergedPRs: data.search?.issueCount ?? 0
     };
   }
   const calendar = owner.contributionsCollection?.contributionCalendar;
@@ -22129,7 +22133,6 @@ async function fetchActivity(login, token) {
     ...calendar
   };
 }
-var fetchCalendar = fetchActivity;
 async function fetchRepository(fullName, token) {
   const [owner, name] = fullName.split("/");
   const { ok, data, notFound, reason } = await graphql(REPOSITORY, { owner, name }, token);
@@ -22202,7 +22205,7 @@ function figures(stats, theme2, span, language) {
   const items = stats.type === "organization" ? [
     [words.commits, format(stats.commits)],
     [words.releases, format(stats.releases)],
-    [words.contributors, format(stats.contributors)],
+    [words.members, format(stats.members)],
     [words.mergedPRs, format(stats.mergedPRs)]
   ] : [
     [words.contributions, format(stats.total)],
@@ -22568,7 +22571,7 @@ async function contributions(config, { token, owner, warn }) {
     warn('Skipping the activity card: it needs a token, and "login" in the config outside GitHub Actions.');
     return null;
   }
-  return summarize(await fetchCalendar(login, token));
+  return summarize(await fetchActivity(login, token));
 }
 async function repository(config, { token, warn }) {
   if (!token) {

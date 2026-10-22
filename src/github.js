@@ -1,4 +1,4 @@
-const ACTIVITY = `query ($login: String!, $since: GitTimestamp) {
+const ACTIVITY = `query ($login: String!, $since: GitTimestamp!, $prQuery: String!) {
   repositoryOwner(login: $login) {
     __typename
     ... on User {
@@ -24,15 +24,17 @@ const ACTIVITY = `query ($login: String!, $since: GitTimestamp) {
               }
             }
           }
-          releases {
-            totalCount
-          }
-          pullRequests(states: MERGED) {
-            totalCount
+          releases(first: 100, orderBy: {field: CREATED_AT, direction: DESC}) {
+            nodes {
+              publishedAt
+            }
           }
         }
       }
     }
+  }
+  search(query: $prQuery, type: ISSUE) {
+    issueCount
   }
 }`;
 
@@ -65,10 +67,12 @@ async function graphql(query, variables, token) {
 
 // Auto-detects whether the account is a personal User or an Organization:
 // - A User returns their personal contribution calendar.
-// - An Organization aggregates commits, releases, members and merged PRs across top 20 public repos.
+// - An Organization aggregates commits, releases, members and merged PRs over the last 12 months.
 export async function fetchActivity(login, token) {
-  const since = new Date(Date.now() - 365 * 86_400_000).toISOString();
-  const { ok, data, notFound, reason } = await graphql(ACTIVITY, { login, since }, token);
+  const date = new Date(Date.now() - 365 * 86_400_000).toISOString().slice(0, 10);
+  const since = `${date}T00:00:00Z`;
+  const prQuery = `org:${login} is:pr is:merged merged:>=${date}`;
+  const { ok, data, notFound, reason } = await graphql(ACTIVITY, { login, since, prQuery }, token);
   const owner = data?.repositoryOwner;
   if (notFound || (ok && !owner)) {
     throw new Error(`Could not find the account "${login}". Check that the user or organization exists.`);
@@ -80,9 +84,9 @@ export async function fetchActivity(login, token) {
     return {
       type: 'organization',
       commits: repos.reduce((sum, r) => sum + (r.defaultBranchRef?.target?.history?.totalCount ?? 0), 0),
-      releases: repos.reduce((sum, r) => sum + (r.releases?.totalCount ?? 0), 0),
-      contributors: owner.membersWithRole?.totalCount ?? 0,
-      mergedPRs: repos.reduce((sum, r) => sum + (r.pullRequests?.totalCount ?? 0), 0),
+      releases: repos.reduce((sum, r) => sum + (r.releases?.nodes?.filter((n) => n.publishedAt && new Date(n.publishedAt) >= new Date(since)).length ?? 0), 0),
+      members: owner.membersWithRole?.totalCount ?? 0,
+      mergedPRs: data.search?.issueCount ?? 0,
     };
   }
 
@@ -93,8 +97,6 @@ export async function fetchActivity(login, token) {
     ...calendar,
   };
 }
-
-export const fetchCalendar = fetchActivity;
 
 // A private repository is refused rather than shown: the card would put its name and
 // description on a public profile, which is easy to do by accident with a broad token.

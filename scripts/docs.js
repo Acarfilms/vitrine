@@ -4,7 +4,7 @@
 
 import { mkdir, rm, writeFile } from 'node:fs/promises';
 import { loadConfig, normalize } from '../src/config.js';
-import { fetchCalendar, fetchRepository, summarize } from '../src/github.js';
+import { fetchActivity, fetchRepository, summarize } from '../src/github.js';
 import { glass, glassDefs, ON_GLASS } from '../src/render/glass.js';
 import { icon, SYMBOL_NAMES } from '../src/render/icons.js';
 import { renderCards } from '../src/render/index.js';
@@ -81,7 +81,7 @@ for (const mode of MODE_NAMES) await save(`symbols-${mode}.svg`, symbolSheet(the
 
 const example = await loadConfig(new URL('../examples/vitrine.yml', import.meta.url));
 const token = process.env.GITHUB_TOKEN;
-const stats = token ? summarize(await fetchCalendar(example.login, token)) : null;
+const stats = token ? summarize(await fetchActivity(example.login, token)) : null;
 const repo = token && example.featured ? await fetchRepository(example.featured.repo, token) : null;
 if (!token) console.warn('GITHUB_TOKEN is not set, so the example has no activity or featured card.');
 

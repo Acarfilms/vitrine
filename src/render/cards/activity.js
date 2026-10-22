@@ -30,7 +30,7 @@ function figures(stats, theme, span, language) {
     ? [
         [words.commits, format(stats.commits)],
         [words.releases, format(stats.releases)],
-        [words.contributors, format(stats.contributors)],
+        [words.members, format(stats.members)],
         [words.mergedPRs, format(stats.mergedPRs)],
       ]
     : [

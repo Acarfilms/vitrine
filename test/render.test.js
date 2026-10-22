@@ -134,12 +134,12 @@ test('the activity card renders organization metrics', () => {
     type: 'organization',
     commits: 1200,
     releases: 15,
-    contributors: 42,
+    members: 42,
     mergedPRs: 88,
   };
   const [card] = renderCards(config, { stats: orgStats });
 
-  for (const word of ['Commits', 'Releases', 'Contributors', 'Merged PRs', '1,200', '15', '42', '88']) {
+  for (const word of ['Commits', 'Releases', 'Members', 'Merged PRs', '1,200', '15', '42', '88']) {
     assert.ok(card.svg.includes(word), `missing "${word}"`);
   }
   assert.doesNotMatch(card.svg, /Contributions|Active days|streak/i);

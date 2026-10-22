@@ -92,6 +92,8 @@ test('reads a user contribution calendar', async (t) => {
 test('reads and aggregates an organization activity', async (t) => {
   const original = globalThis.fetch;
   t.after(() => { globalThis.fetch = original; });
+  const recent = new Date().toISOString();
+  const old = new Date(Date.now() - 400 * 86_400_000).toISOString();
   respond({
     data: {
       repositoryOwner: {
@@ -101,21 +103,32 @@ test('reads and aggregates an organization activity', async (t) => {
           nodes: [
             {
               defaultBranchRef: { target: { history: { totalCount: 120 } } },
-              releases: { totalCount: 4 },
-              pullRequests: { totalCount: 18 },
+              releases: {
+                nodes: [
+                  { publishedAt: recent },
+                  { publishedAt: recent },
+                  { publishedAt: old },
+                ],
+              },
             },
             {
               defaultBranchRef: { target: { history: { totalCount: 80 } } },
-              releases: { totalCount: 2 },
-              pullRequests: { totalCount: 12 },
+              releases: {
+                nodes: [
+                  { publishedAt: recent },
+                  { publishedAt: null },
+                ],
+              },
             },
             {
               defaultBranchRef: null,
-              releases: { totalCount: 0 },
-              pullRequests: { totalCount: 0 },
+              releases: { nodes: [] },
             },
           ],
         },
+      },
+      search: {
+        issueCount: 30,
       },
     },
   });
@@ -123,15 +136,15 @@ test('reads and aggregates an organization activity', async (t) => {
   assert.deepEqual(activity, {
     type: 'organization',
     commits: 200,
-    releases: 6,
-    contributors: 15,
+    releases: 3,
+    members: 15,
     mergedPRs: 30,
   });
   assert.deepEqual(summarize(activity), {
     type: 'organization',
     commits: 200,
-    releases: 6,
-    contributors: 15,
+    releases: 3,
+    members: 15,
     mergedPRs: 30,
   });
 });

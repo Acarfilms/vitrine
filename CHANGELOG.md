@@ -2,7 +2,7 @@
 
 ## Unreleased
 
-- An activity card for organizations: when `activity: true` runs for an organization, it shows public commits, releases, contributors and merged pull requests across active repositories over the last 12 months.
+- An activity card for organizations: when `activity: true` runs for an organization, it shows public commits, releases, members and merged pull requests across active repositories over the last 12 months.
 
 ## 1.4.0 (2026-10-19)
 
