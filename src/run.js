@@ -1,7 +1,7 @@
 import { appendFile, mkdir, readdir, rm, writeFile } from 'node:fs/promises';
 import { dirname, join, relative, resolve } from 'node:path';
 import { loadConfig } from './config.js';
-import { fetchCalendar, fetchRepository, summarize } from './github.js';
+import { fetchActivity, fetchRepository, summarize } from './github.js';
 import { CARD_FILE, renderCards } from './render/index.js';
 import { snippet } from './snippet.js';
 
@@ -39,7 +39,7 @@ async function contributions(config, { token, owner, warn }) {
     warn('Skipping the activity card: it needs a token, and "login" in the config outside GitHub Actions.');
     return null;
   }
-  return summarize(await fetchCalendar(login, token));
+  return summarize(await fetchActivity(login, token));
 }
 
 async function repository(config, { token, warn }) {

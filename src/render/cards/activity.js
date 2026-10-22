@@ -8,24 +8,37 @@ const HEIGHT = 280;
 export function activity({ title }, stats, theme, language = 'en') {
   const span = CARD_WIDTH - INSET * 2;
   const words = LANGUAGES[language].activity;
+  const isOrg = stats.type === 'organization';
+  const height = isOrg ? 148 : HEIGHT;
 
-  return section(theme, { title, aside: words.period }, HEIGHT, [
-    surface(theme, { y: CONTENT_TOP, height: HEIGHT }),
+  const body = [
+    surface(theme, { y: CONTENT_TOP, height }),
     figures(stats, theme, span, language),
-    `<path d="M${INSET} ${CONTENT_TOP + 128.5}H${CARD_WIDTH - INSET}" stroke="${theme.separator}"/>`,
-    chart(stats, theme, span, words),
-  ].join('\n'));
+    ...(!isOrg ? [
+      `<path d="M${INSET} ${CONTENT_TOP + 128.5}H${CARD_WIDTH - INSET}" stroke="${theme.separator}"/>`,
+      chart(stats, theme, span, words),
+    ] : []),
+  ];
+
+  return section(theme, { title, aside: words.period }, height, body.join('\n'));
 }
 
 function figures(stats, theme, span, language) {
   const words = LANGUAGES[language].activity;
   const format = (n) => formatNumber(n, language);
-  const items = [
-    [words.contributions, format(stats.total)],
-    [words.activeDays, format(stats.activeDays)],
-    [words.currentStreak, format(stats.currentStreak), days(stats.currentStreak, language)],
-    [words.longestStreak, format(stats.longestStreak), days(stats.longestStreak, language)],
-  ];
+  const items = stats.type === 'organization'
+    ? [
+        [words.commits, format(stats.commits)],
+        [words.releases, format(stats.releases)],
+        [words.members, format(stats.members)],
+        [words.mergedPRs, format(stats.mergedPRs)],
+      ]
+    : [
+        [words.contributions, format(stats.total)],
+        [words.activeDays, format(stats.activeDays)],
+        [words.currentStreak, format(stats.currentStreak), days(stats.currentStreak, language)],
+        [words.longestStreak, format(stats.longestStreak), days(stats.longestStreak, language)],
+      ];
 
   return items.map(([label, value, unit], i) => {
     const x = round(INSET + (i * span) / items.length);

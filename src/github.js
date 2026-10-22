@@ -1,11 +1,40 @@
-const CALENDAR = `query ($login: String!) {
-  user(login: $login) {
-    contributionsCollection {
-      contributionCalendar {
-        totalContributions
-        weeks { contributionDays { date contributionCount } }
+const ACTIVITY = `query ($login: String!, $since: GitTimestamp!, $prQuery: String!) {
+  repositoryOwner(login: $login) {
+    __typename
+    ... on User {
+      contributionsCollection {
+        contributionCalendar {
+          totalContributions
+          weeks { contributionDays { date contributionCount } }
+        }
       }
     }
+    ... on Organization {
+      membersWithRole {
+        totalCount
+      }
+      repositories(first: 20, isFork: false, privacy: PUBLIC, orderBy: {field: PUSHED_AT, direction: DESC}) {
+        nodes {
+          defaultBranchRef {
+            target {
+              ... on Commit {
+                history(since: $since) {
+                  totalCount
+                }
+              }
+            }
+          }
+          releases(first: 100, orderBy: {field: CREATED_AT, direction: DESC}) {
+            nodes {
+              publishedAt
+            }
+          }
+        }
+      }
+    }
+  }
+  search(query: $prQuery, type: ISSUE) {
+    issueCount
   }
 }`;
 
@@ -36,16 +65,37 @@ async function graphql(query, variables, token) {
   return { ok: response.ok, data: payload.data, notFound, reason };
 }
 
-// The calendar is the same one drawn on the profile page, so private contributions are
-// included (as plain counts) only when the user has turned that on in their settings.
-export async function fetchCalendar(login, token) {
-  const { ok, data, notFound, reason } = await graphql(CALENDAR, { login }, token);
-  if (notFound) {
-    throw new Error(`"${login}" is not a personal GitHub account. The activity card only works for people, not organizations.`);
+// Auto-detects whether the account is a personal User or an Organization:
+// - A User returns their personal contribution calendar.
+// - An Organization aggregates commits, releases, members and merged PRs over the last 12 months.
+export async function fetchActivity(login, token) {
+  const date = new Date(Date.now() - 365 * 86_400_000).toISOString().slice(0, 10);
+  const since = `${date}T00:00:00Z`;
+  const prQuery = `org:${login} is:pr is:merged merged:>=${date}`;
+  const { ok, data, notFound, reason } = await graphql(ACTIVITY, { login, since, prQuery }, token);
+  const owner = data?.repositoryOwner;
+  if (notFound || (ok && !owner)) {
+    throw new Error(`Could not find the account "${login}". Check that the user or organization exists.`);
   }
-  const calendar = data?.user?.contributionsCollection?.contributionCalendar;
-  if (!ok || !calendar) throw new Error(`Could not read the contribution calendar for "${login}": ${reason}`);
-  return calendar;
+  if (!ok || !owner) throw new Error(`Could not read activity for "${login}": ${reason}`);
+
+  if (owner.__typename === 'Organization') {
+    const repos = owner.repositories?.nodes ?? [];
+    return {
+      type: 'organization',
+      commits: repos.reduce((sum, r) => sum + (r.defaultBranchRef?.target?.history?.totalCount ?? 0), 0),
+      releases: repos.reduce((sum, r) => sum + (r.releases?.nodes?.filter((n) => n.publishedAt && new Date(n.publishedAt) >= new Date(since)).length ?? 0), 0),
+      members: owner.membersWithRole?.totalCount ?? 0,
+      mergedPRs: data.search?.issueCount ?? 0,
+    };
+  }
+
+  const calendar = owner.contributionsCollection?.contributionCalendar;
+  if (!calendar) throw new Error(`Could not read the contribution calendar for "${login}": ${reason}`);
+  return {
+    type: 'user',
+    ...calendar,
+  };
 }
 
 // A private repository is refused rather than shown: the card would put its name and
@@ -70,7 +120,12 @@ export async function fetchRepository(fullName, token) {
   };
 }
 
-export function summarize(calendar) {
+export function summarize(activity) {
+  if (activity.type === 'organization') {
+    return activity;
+  }
+
+  const calendar = activity;
   const days = calendar.weeks.flatMap((week) => week.contributionDays);
 
   let longestStreak = 0;
@@ -87,6 +142,7 @@ export function summarize(calendar) {
   for (; i >= 0 && days[i].contributionCount > 0; i -= 1) currentStreak += 1;
 
   return {
+    type: 'user',
     total: calendar.totalContributions,
     activeDays: days.filter((day) => day.contributionCount > 0).length,
     currentStreak,
