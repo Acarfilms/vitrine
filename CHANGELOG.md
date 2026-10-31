@@ -2,11 +2,14 @@
 
 ## Unreleased
 
+
 - An activity card for organizations: when `activity: true` runs for an organization, it shows public commits, releases, members and merged pull requests across active repositories over the last 12 months.
+
 
 ## 1.4.0 (2026-10-19)
 
 - Three more wallpapers: `aurora`, `ember` and `nebula`.
+
 
 ## 1.3.0 (2026-10-14)
 
