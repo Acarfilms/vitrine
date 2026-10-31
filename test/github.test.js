@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
-import { fetchRepository, summarize } from '../src/github.js';
+import { fetchActivity, fetchRepository, summarize } from '../src/github.js';
 
 // Builds a calendar from a list of daily counts, starting on a Sunday.
 function calendar(counts) {
@@ -67,3 +67,92 @@ test('says which repository could not be found', async (t) => {
   respond({ data: { repository: null }, errors: [{ type: 'NOT_FOUND', message: 'Could not resolve' }] });
   await assert.rejects(fetchRepository('ada/missing', 'token'), /Could not find the repository "ada\/missing"/);
 });
+
+test('reads a user contribution calendar', async (t) => {
+  const original = globalThis.fetch;
+  t.after(() => { globalThis.fetch = original; });
+  respond({
+    data: {
+      repositoryOwner: {
+        __typename: 'User',
+        contributionsCollection: {
+          contributionCalendar: {
+            totalContributions: 42,
+            weeks: [{ contributionDays: [{ date: '2026-01-01', contributionCount: 5 }] }],
+          },
+        },
+      },
+    },
+  });
+  const activity = await fetchActivity('ada', 'token');
+  assert.equal(activity.type, 'user');
+  assert.equal(activity.totalContributions, 42);
+});
+
+test('reads and aggregates an organization activity', async (t) => {
+  const original = globalThis.fetch;
+  t.after(() => { globalThis.fetch = original; });
+  const recent = new Date().toISOString();
+  const old = new Date(Date.now() - 400 * 86_400_000).toISOString();
+  respond({
+    data: {
+      repositoryOwner: {
+        __typename: 'Organization',
+        membersWithRole: { totalCount: 15 },
+        repositories: {
+          nodes: [
+            {
+              defaultBranchRef: { target: { history: { totalCount: 120 } } },
+              releases: {
+                nodes: [
+                  { publishedAt: recent },
+                  { publishedAt: recent },
+                  { publishedAt: old },
+                ],
+              },
+            },
+            {
+              defaultBranchRef: { target: { history: { totalCount: 80 } } },
+              releases: {
+                nodes: [
+                  { publishedAt: recent },
+                  { publishedAt: null },
+                ],
+              },
+            },
+            {
+              defaultBranchRef: null,
+              releases: { nodes: [] },
+            },
+          ],
+        },
+      },
+      search: {
+        issueCount: 30,
+      },
+    },
+  });
+  const activity = await fetchActivity('my-org', 'token');
+  assert.deepEqual(activity, {
+    type: 'organization',
+    commits: 200,
+    releases: 3,
+    members: 15,
+    mergedPRs: 30,
+  });
+  assert.deepEqual(summarize(activity), {
+    type: 'organization',
+    commits: 200,
+    releases: 3,
+    members: 15,
+    mergedPRs: 30,
+  });
+});
+
+test('says when an account could not be found for activity', async (t) => {
+  const original = globalThis.fetch;
+  t.after(() => { globalThis.fetch = original; });
+  respond({ data: { repositoryOwner: null }, errors: [{ type: 'NOT_FOUND', message: 'Could not resolve' }] });
+  await assert.rejects(fetchActivity('ghost', 'token'), /Could not find the account "ghost"/);
+});
+

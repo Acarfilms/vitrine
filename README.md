@@ -247,7 +247,7 @@ The text is set in [Inter](https://rsms.me/inter/), embedded in each file as a W
 
 **Can I change the order of the cards?** Yes. Each card is a separate image, so you can move its block anywhere in your README or leave it out.
 
-**Does it work for organizations?** Yes, except for the activity card, which reads a person's contribution calendar and stops the run with an error on an organization. An organization's profile README lives at `profile/README.md` in its `.github` repository, so set `readme: profile/README.md` and an `output` such as `profile/vitrine` to get the right image paths.
+**Does it work for organizations?** Yes. For an organization, the activity card shows public commits, releases, members and merged pull requests over the last 12 months. An organization's profile README lives at `profile/README.md` in its `.github` repository, so set `readme: profile/README.md` and an `output` such as `profile/vitrine` to get the right image paths.
 
 **How do the cards look on a phone?** They scale down with the page. The text is part of the image, so it gets smaller on narrow screens instead of reflowing.
 
