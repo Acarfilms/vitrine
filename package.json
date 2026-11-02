@@ -1,11 +1,16 @@
 {
-  "name": "vitrine",
+  "name": "@acarfilms/vitrine",
   "version": "1.4.0",
-  "private": true,
   "description": "Liquid Glass cards for your GitHub profile README, rendered by a GitHub Action.",
   "license": "MIT",
   "author": "Angel Carrascosa (https://github.com/Acarfilms)",
   "repository": "github:Acarfilms/vitrine",
+  "publishConfig": {
+    "access": "public"
+  },
+  "files": [
+    "src"
+  ],
   "type": "module",
   "bin": {
     "vitrine": "src/cli.js"
