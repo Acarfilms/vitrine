@@ -226,13 +226,13 @@ Hero widgets and links can also use these symbols:
 With Node 22 or later:
 
 ```sh
-npx github:Acarfilms/vitrine --config vitrine.yml --out vitrine
+npx @acarfilms/vitrine --config vitrine.yml --out vitrine
 ```
 
 Add `--snippet` to print the README markup instead of the list of files, or `--help` for the other options. Use `--version` (or `-v`) to print the version and exit. The activity and featured cards also need a token, and the activity card needs `login` in the config:
 
 ```sh
-GITHUB_TOKEN=$(gh auth token) npx github:Acarfilms/vitrine
+GITHUB_TOKEN=$(gh auth token) npx @acarfilms/vitrine
 ```
 
 ## How the glass works
